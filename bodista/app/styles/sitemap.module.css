@@ -1,0 +1,250 @@
+/* ==========================================================================
+   Project Site Map — Layout Module
+   ========================================================================== */
+
+.page {
+  max-width: var(--size-container);
+  margin: 0 auto;
+  padding: 2em;
+}
+
+.pageHeader {
+  margin-bottom: 3em;
+  padding-bottom: 2em;
+  border-bottom: 1px solid var(--color-dark);
+}
+
+/* ==========================================================================
+   Page Card
+   ========================================================================== */
+
+.pageCard {
+  border: 1px solid #e5e5e5;
+  border-radius: 0.5em;
+  overflow: hidden;
+  margin-bottom: 2em;
+}
+
+.pageCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.75em 1em;
+  background: var(--color-dark);
+  color: var(--color-light);
+}
+
+.pageCardTitle {
+  font-weight: 700;
+  font-size: 1em;
+}
+
+.pageCardBody {
+  padding: 0;
+}
+
+/* ==========================================================================
+   Section Block
+   ========================================================================== */
+
+.sectionBlock {
+  padding: 0.75em 1em;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.sectionBlock:last-child {
+  border-bottom: none;
+}
+
+.sectionName {
+  font-weight: 700;
+  font-size: 0.9em;
+  margin-bottom: 0.25em;
+}
+
+.sectionDesc {
+  font-size: 0.8em;
+  line-height: 1.5;
+  opacity: 0.65;
+}
+
+.sectionBlockNavbar {
+  background: #f5f5f5;
+}
+
+.sectionBlockFooter {
+  background: #f5f5f5;
+}
+
+/* ==========================================================================
+   Connection Lines
+   ========================================================================== */
+
+.connector {
+  display: flex;
+  justify-content: center;
+  padding: 1.5em 0;
+}
+
+.connectorLine {
+  width: 1px;
+  height: 2em;
+  background: #ccc;
+}
+
+.connectorBranch {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1em 0 2em;
+  position: relative;
+}
+
+.connectorBranch::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 1em;
+  background: #ccc;
+}
+
+.connectorHorizontal {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  padding-top: 1em;
+}
+
+.connectorHorizontal::before {
+  content: '';
+  position: absolute;
+  top: 1em;
+  left: var(--branch-left, 12.5%);
+  right: var(--branch-right, 12.5%);
+  height: 1px;
+  background: #ccc;
+}
+
+.connectorDrop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.connectorDrop::before {
+  content: '';
+  width: 1px;
+  height: 1.5em;
+  background: #ccc;
+}
+
+/* ==========================================================================
+   Sub-connection (page to child page)
+   ========================================================================== */
+
+.subConnector {
+  display: flex;
+  justify-content: center;
+  padding: 1em 0;
+  position: relative;
+}
+
+.subConnectorLine {
+  width: 1px;
+  height: 2em;
+  background: #ccc;
+}
+
+/* ==========================================================================
+   Grid Layout
+   ========================================================================== */
+
+.primarySection {
+  max-width: 28em;
+  margin: 0 auto;
+}
+
+.childrenGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5em;
+}
+
+@media (max-width: 991px) {
+  .childrenGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1em;
+  }
+}
+
+@media (max-width: 479px) {
+  .childrenGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sub-page grid (for pages that branch further) */
+.subPageWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.subPageConnector {
+  display: flex;
+  justify-content: center;
+  padding: 0.75em 0;
+}
+
+.subPageConnectorLine {
+  width: 1px;
+  height: 1.5em;
+  background: #ccc;
+}
+
+/* ==========================================================================
+   Section Label / Legend
+   ========================================================================== */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5em;
+  margin-bottom: 2em;
+  padding: 1em;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.5em;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.8em;
+}
+
+.legendSwatch {
+  width: 1em;
+  height: 1em;
+  border-radius: 0.15em;
+  border: 1px solid #e5e5e5;
+}
+
+.legendSwatchDark {
+  background: var(--color-dark);
+}
+
+.legendSwatchLight {
+  background: #f5f5f5;
+}
+
+.legendSwatchWhite {
+  background: var(--color-light);
+  border: 1px solid #ccc;
+}

@@ -1,0 +1,177 @@
+/* ==========================================================================
+   Stylesheet Page — Layout Only
+   ========================================================================== */
+
+.page {
+  max-width: var(--size-container);
+  margin: 0 auto;
+  padding: 2em;
+}
+
+.header {
+  margin-bottom: 3em;
+  padding-bottom: 2em;
+  border-bottom: 1px solid var(--color-dark);
+}
+
+.section {
+  margin-bottom: 4em;
+}
+
+.sectionTitle {
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 1.5em;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+  margin-bottom: 2em;
+}
+
+.col {
+  flex: 1;
+  min-width: 15em;
+}
+
+.colFull {
+  width: 100%;
+}
+
+.specimen {
+  margin-bottom: 1.5em;
+}
+
+.specimenLabel {
+  display: block;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+  margin-bottom: 0.5em;
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10em, 1fr));
+  gap: 1em;
+}
+
+.colorSwatch {
+  border-radius: 0.25em;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+}
+
+.colorSwatchBlock {
+  height: 5em;
+}
+
+.colorSwatchInfo {
+  padding: 0.5em 0.75em;
+  font-size: 0.8em;
+}
+
+.colorSwatchName {
+  font-weight: 600;
+}
+
+.colorSwatchValue {
+  opacity: 0.6;
+}
+
+.scaleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12em, 1fr));
+  gap: 1em;
+}
+
+.scaleItem {
+  padding: 1em;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.25em;
+}
+
+.scaleItemLabel {
+  font-size: 0.75em;
+  opacity: 0.5;
+  margin-bottom: 0.25em;
+}
+
+.scaleItemValue {
+  font-weight: 600;
+  font-size: 0.9em;
+  word-break: break-all;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+  align-items: center;
+}
+
+.exampleButton {
+  padding: 0.5em 1.5em;
+  border: 1px solid var(--color-dark);
+  border-radius: 0.25em;
+  background: var(--color-dark);
+  color: var(--color-light);
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.exampleButtonOutline {
+  padding: 0.5em 1.5em;
+  border: 1px solid var(--color-dark);
+  border-radius: 0.25em;
+  background: transparent;
+  color: var(--color-dark);
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.gridDemo {
+  display: grid;
+  gap: 1em;
+}
+
+.gridDemo2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.gridDemo3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.gridDemo4col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 767px) {
+  .gridDemo3col,
+  .gridDemo4col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.gridDemoItem {
+  background: #f5f5f5;
+  border-radius: 0.25em;
+  padding: 2em 1em;
+  text-align: center;
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 2em 0;
+}
+
+.formDemo {
+  max-width: 100%;
+}
