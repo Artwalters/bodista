@@ -7,26 +7,57 @@ const FONT_URL = '/fonts/BebasNeue-Regular.ttf';
 /* ── Shaders ── */
 
 const textVertShader = /* glsl */ `
-uniform float uProgress;
-uniform float uHeight;
 varying vec2 vUv;
 
 void main() {
   vUv = uv;
-  vec3 pos = position;
-  pos.y -= uHeight * (1.0 - uProgress);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
 const textFragShader = /* glsl */ `
-uniform float uProgress;
+uniform float uReveal;
 uniform vec3 uColor;
 varying vec2 vUv;
 
+// pseudo-random hash
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+// value noise with smooth interpolation
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
+
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// fractal brownian motion for richer detail
+float fbm(vec2 p) {
+  float value = 0.0;
+  float amp = 0.5;
+  for (int i = 0; i < 5; i++) {
+    value += amp * noise(p);
+    p *= 2.0;
+    amp *= 0.5;
+  }
+  return value;
+}
+
 void main() {
-  float reveal = 1.0 - vUv.y;
-  if (reveal > uProgress) discard;
+  float n = fbm(vUv * 6.0);
+
+  // soft edge reveal driven by uReveal (0 = hidden, 1 = fully visible)
+  float edge = smoothstep(uReveal - 0.15, uReveal + 0.05, n);
+  if (edge > 0.5) discard;
+
   gl_FragColor = vec4(uColor, 1.0);
 }
 `;
@@ -166,8 +197,7 @@ export default function TextDemo() {
           fragmentShader: textFragShader,
           vertexShader: textVertShader,
           uniforms: {
-            uProgress: new THREE.Uniform(0),
-            uHeight: new THREE.Uniform(bounds.height),
+            uReveal: new THREE.Uniform(0),
             uColor: new THREE.Uniform(color),
           },
         });
@@ -198,9 +228,16 @@ export default function TextDemo() {
 
       /* ── IntersectionObserver (replaces motion's inView) ── */
 
+      /* ── Noise reveal animation on page load ── */
+
       texts.forEach((t) => {
         t.isVisible = true;
-        t.material.uniforms.uProgress.value = 1;
+        gsap.to(t.material.uniforms.uReveal, {
+          value: 1,
+          duration: 2.5,
+          delay: 0.3,
+          ease: 'power2.inOut',
+        });
       });
 
       /* ── Post-processing ── */
@@ -279,7 +316,6 @@ export default function TextDemo() {
           const lh = parseFloat(computed.lineHeight);
           t.mesh.lineHeight = isNaN(lh) ? 1.2 : lh / fs;
           t.mesh.maxWidth = t.bounds.width;
-          t.material.uniforms.uHeight.value = t.bounds.height;
         });
       };
 
