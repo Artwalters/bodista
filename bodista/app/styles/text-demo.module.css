@@ -103,3 +103,24 @@
   font-size: 13.979em;
   max-width: 2.4em;
 }
+
+.imageGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10rem;
+  padding: 4rem 6vw;
+}
+
+.figure {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.gridImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}

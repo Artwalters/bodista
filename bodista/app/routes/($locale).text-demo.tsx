@@ -4,7 +4,7 @@ import styles from '~/styles/text-demo.module.css';
 
 const FONT_URL = '/fonts/BebasNeue-Regular.ttf';
 
-/* ── Shaders ── */
+/* ── Text Shaders ── */
 
 const textVertShader = /* glsl */ `
 varying vec2 vUv;
@@ -20,26 +20,21 @@ uniform float uReveal;
 uniform vec3 uColor;
 varying vec2 vUv;
 
-// pseudo-random hash
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
-// value noise with smooth interpolation
 float noise(vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);
   vec2 u = f * f * (3.0 - 2.0 * f);
-
   float a = hash(i);
   float b = hash(i + vec2(1.0, 0.0));
   float c = hash(i + vec2(0.0, 1.0));
   float d = hash(i + vec2(1.0, 1.0));
-
   return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
-// fractal brownian motion for richer detail
 float fbm(vec2 p) {
   float value = 0.0;
   float amp = 0.5;
@@ -53,44 +48,62 @@ float fbm(vec2 p) {
 
 void main() {
   float n = fbm(vUv * 6.0);
-
-  // soft edge reveal driven by uReveal (0 = hidden, 1 = fully visible)
-  float edge = smoothstep(uReveal - 0.15, uReveal + 0.05, n);
-  if (edge > 0.5) discard;
-
-  gl_FragColor = vec4(uColor, 1.0);
+  float expandedReveal = uReveal * 1.6 - 0.3;
+  float mask = smoothstep(expandedReveal - 0.3, expandedReveal + 0.3, n);
+  float alpha = 1.0 - mask;
+  if (alpha < 0.01) discard;
+  gl_FragColor = vec4(uColor, alpha);
 }
 `;
 
-const ppVertShader = /* glsl */ `
+/* ── Image Shaders ── */
+
+const imgVertShader = /* glsl */ `
+uniform vec2 uTextureSize;
+uniform vec2 uQuadSize;
+uniform float uViewportY;
+
 varying vec2 vUv;
+varying vec2 vUvCover;
+
+vec2 getCoverUv(vec2 uv, vec2 textureSize, vec2 quadSize) {
+  vec2 ratio = vec2(
+    min((quadSize.x / quadSize.y) / (textureSize.x / textureSize.y), 1.0),
+    min((quadSize.y / quadSize.x) / (textureSize.y / textureSize.x), 1.0)
+  );
+  return vec2(
+    uv.x * ratio.x + (1.0 - ratio.x) * 0.5,
+    uv.y * ratio.y + (1.0 - ratio.y) * 0.5
+  );
+}
 
 void main() {
   vUv = uv;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  vUvCover = getCoverUv(uv, uTextureSize, uQuadSize);
+
+  vec3 pos = position;
+
+  // Strong when entering from bottom, fades to flat at center of screen
+  float effect = smoothstep(0.2, 0.9, uViewportY);
+
+  // Bottom of image curves towards camera
+  float t = 1.0 - uv.y;
+  pos.z += t * t * effect * 150.0;
+
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `;
 
-const ppFragShader = /* glsl */ `
-uniform sampler2D tDiffuse;
-uniform float uVelocity;
-uniform float uTime;
-varying vec2 vUv;
+const imgFragShader = /* glsl */ `
+precision highp float;
+
+uniform sampler2D uTexture;
+
+varying vec2 vUvCover;
 
 void main() {
-  vec2 uv = vUv;
-
-  float waveAmplitude = uVelocity * 0.0009;
-  float waveFrequency = 4.0 + uVelocity * 0.01;
-
-  vec2 waveUv = uv;
-  waveUv.x += sin(uv.y * waveFrequency + uTime) * waveAmplitude;
-  waveUv.y += sin(uv.x * waveFrequency * 5.0 + uTime * 0.8) * waveAmplitude;
-
-  float r = texture2D(tDiffuse, vec2(waveUv.x, waveUv.y + uVelocity * 0.0005)).r;
-  vec4 base = texture2D(tDiffuse, waveUv);
-
-  gl_FragColor = vec4(r, base.gb, base.a);
+  vec4 tex = texture2D(uTexture, vUvCover);
+  gl_FragColor = tex;
 }
 `;
 
@@ -98,7 +111,7 @@ export const meta: Route.MetaFunction = () => {
   return [{title: 'Bodista | WebGL Text Demo'}];
 };
 
-/* ── Types for the imperative WebGL layer ── */
+/* ── Types ── */
 
 interface TextEntry {
   mesh: any;
@@ -109,14 +122,22 @@ interface TextEntry {
   isVisible: boolean;
 }
 
-// import THREE as a type-only namespace for the interface above
+interface ImageEntry {
+  mesh: THREE.Mesh;
+  element: HTMLImageElement;
+  material: THREE.ShaderMaterial;
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+}
+
 import type * as THREE from 'three';
 
 export default function TextDemo() {
   useEffect(() => {
     let animationId: number;
     let resizeHandler: (() => void) | undefined;
-    let observer: IntersectionObserver | undefined;
     let canvas: HTMLCanvasElement | undefined;
     let cancelled = false;
 
@@ -125,15 +146,6 @@ export default function TextDemo() {
 
       const THREE = await import('three');
       const {Text} = await import('troika-three-text');
-      const {EffectComposer} = await import(
-        'three/examples/jsm/postprocessing/EffectComposer.js'
-      );
-      const {RenderPass} = await import(
-        'three/examples/jsm/postprocessing/RenderPass.js'
-      );
-      const {ShaderPass} = await import(
-        'three/examples/jsm/postprocessing/ShaderPass.js'
-      );
       const {getLenisInstance} = await import('~/lib/lenis');
       const gsap = (await import('gsap')).default;
 
@@ -151,7 +163,7 @@ export default function TextDemo() {
         width: window.innerWidth,
         height: window.innerHeight,
       };
-      const DIST = 1000;
+      const DIST = 500;
 
       const fov =
         2 * Math.atan(screen.height / 2 / DIST) * (180 / Math.PI);
@@ -159,8 +171,8 @@ export default function TextDemo() {
       const camera = new THREE.PerspectiveCamera(
         fov,
         screen.width / screen.height,
-        200,
-        2000,
+        10,
+        1000,
       );
       camera.position.z = DIST;
 
@@ -196,6 +208,7 @@ export default function TextDemo() {
         const material = new THREE.ShaderMaterial({
           fragmentShader: textFragShader,
           vertexShader: textVertShader,
+          transparent: true,
           uniforms: {
             uReveal: new THREE.Uniform(0),
             uColor: new THREE.Uniform(color),
@@ -226,8 +239,6 @@ export default function TextDemo() {
         texts.push({mesh, element, material, bounds, y, isVisible: false});
       });
 
-      /* ── IntersectionObserver (replaces motion's inView) ── */
-
       /* ── Noise reveal animation on page load ── */
 
       texts.forEach((t) => {
@@ -240,33 +251,75 @@ export default function TextDemo() {
         });
       });
 
-      /* ── Post-processing ── */
+      /* ── WebGL images ── */
 
-      const composer = new EffectComposer(renderer);
-      composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      composer.setSize(screen.width, screen.height);
+      const mediaElements = document.querySelectorAll<HTMLImageElement>(
+        '[data-webgl-media]',
+      );
+      const images: ImageEntry[] = [];
+      const imageGeometry = new THREE.PlaneGeometry(1, 1, 32, 32);
+      const textureLoader = new THREE.TextureLoader();
 
-      composer.addPass(new RenderPass(scene, camera));
+      // Wait for all images to load
+      await Promise.all(
+        Array.from(mediaElements).map(
+          (img) =>
+            new Promise<void>((resolve) => {
+              if (img.complete && img.naturalWidth > 0) {
+                resolve();
+              } else {
+                img.onload = () => resolve();
+                img.onerror = () => resolve();
+              }
+            }),
+        ),
+      );
 
-      const shiftPass = new ShaderPass({
-        uniforms: {
-          tDiffuse: {value: null},
-          uVelocity: {value: 0},
-          uTime: {value: 0},
-        },
-        vertexShader: ppVertShader,
-        fragmentShader: ppFragShader,
-      });
-      composer.addPass(shiftPass);
+      if (cancelled) return;
+
+      for (const img of mediaElements) {
+        const texture = await textureLoader.loadAsync(img.src);
+        const bounds = img.getBoundingClientRect();
+
+        const imgMaterial = new THREE.ShaderMaterial({
+          vertexShader: imgVertShader,
+          fragmentShader: imgFragShader,
+          uniforms: {
+            uTexture: {value: texture},
+            uTextureSize: {
+              value: new THREE.Vector2(
+                texture.image.width,
+                texture.image.height,
+              ),
+            },
+            uQuadSize: {
+              value: new THREE.Vector2(bounds.width, bounds.height),
+            },
+            uViewportY: {value: 0},
+          },
+        });
+
+        const imgMesh = new THREE.Mesh(imageGeometry, imgMaterial);
+        imgMesh.scale.set(bounds.width, bounds.height, 1);
+        scene.add(imgMesh);
+
+        img.style.visibility = 'hidden';
+
+        images.push({
+          mesh: imgMesh,
+          element: img,
+          material: imgMaterial,
+          width: bounds.width,
+          height: bounds.height,
+          top: bounds.top + lenis.actualScroll,
+          left: bounds.left,
+        });
+      }
 
       /* ── Render loop ── */
 
-      const clock = new THREE.Clock();
-      let lerpedVelocity = 0;
-
       const update = () => {
-        const elapsed = clock.getElapsedTime();
-
+        // Update text positions
         texts.forEach((t) => {
           if (t.isVisible) {
             t.mesh.position.y =
@@ -278,11 +331,26 @@ export default function TextDemo() {
           }
         });
 
-        shiftPass.uniforms.uTime.value = elapsed;
-        lerpedVelocity += (lenis.velocity - lerpedVelocity) * 0.15;
-        shiftPass.uniforms.uVelocity.value = lerpedVelocity;
+        // Update image positions + bottom curve
+        images.forEach((img) => {
+          img.mesh.position.x =
+            img.left - screen.width / 2 + img.width / 2;
+          img.mesh.position.y =
+            -img.top +
+            lenis.animatedScroll +
+            screen.height / 2 -
+            img.height / 2;
 
-        composer.render();
+          // Normalized viewport Y: 0 = top of screen, 1 = bottom
+          const imgScreenY = img.top - lenis.animatedScroll;
+          const imgCenterY = imgScreenY + img.height / 2;
+          const viewportY = imgCenterY / screen.height;
+          img.material.uniforms.uViewportY.value = viewportY;
+
+          img.mesh.scale.set(img.width, img.height, 1);
+        });
+
+        renderer.render(scene, camera);
         animationId = requestAnimationFrame(update);
       };
 
@@ -302,9 +370,7 @@ export default function TextDemo() {
         camera.aspect = screen.width / screen.height;
         camera.updateProjectionMatrix();
 
-        composer.setSize(screen.width, screen.height);
-        composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
+        // Resize texts
         texts.forEach((t) => {
           const computed = window.getComputedStyle(t.element);
           t.bounds = t.element.getBoundingClientRect();
@@ -317,6 +383,20 @@ export default function TextDemo() {
           t.mesh.lineHeight = isNaN(lh) ? 1.2 : lh / fs;
           t.mesh.maxWidth = t.bounds.width;
         });
+
+        // Resize images
+        images.forEach((img) => {
+          const bounds = img.element.getBoundingClientRect();
+          img.mesh.scale.set(bounds.width, bounds.height, 1);
+          img.width = bounds.width;
+          img.height = bounds.height;
+          img.top = bounds.top + lenis.actualScroll;
+          img.left = bounds.left;
+          img.material.uniforms.uQuadSize.value.set(
+            bounds.width,
+            bounds.height,
+          );
+        });
       };
 
       window.addEventListener('resize', resizeHandler);
@@ -328,7 +408,6 @@ export default function TextDemo() {
       cancelled = true;
       if (animationId) cancelAnimationFrame(animationId);
       if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-      if (observer) observer.disconnect();
       if (canvas) canvas.remove();
     };
   }, []);
@@ -339,6 +418,40 @@ export default function TextDemo() {
         <h2 data-animation="webgl-text" className={styles.heroText}>
           BODISTA
         </h2>
+      </section>
+      <section className={styles.imageGrid}>
+        <figure className={styles.figure}>
+          <img
+            data-webgl-media
+            src="/images/1.jpg"
+            alt="Bodista visual 1"
+            className={styles.gridImage}
+          />
+        </figure>
+        <figure className={styles.figure}>
+          <img
+            data-webgl-media
+            src="/images/2.jpg"
+            alt="Bodista visual 2"
+            className={styles.gridImage}
+          />
+        </figure>
+        <figure className={styles.figure}>
+          <img
+            data-webgl-media
+            src="/images/3.jpg"
+            alt="Bodista visual 3"
+            className={styles.gridImage}
+          />
+        </figure>
+        <figure className={styles.figure}>
+          <img
+            data-webgl-media
+            src="/images/4.jpg"
+            alt="Bodista visual 4"
+            className={styles.gridImage}
+          />
+        </figure>
       </section>
     </div>
   );
