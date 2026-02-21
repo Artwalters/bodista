@@ -59,12 +59,47 @@ void main() {
 /* ── Image Shaders ── */
 
 const imgVertShader = /* glsl */ `
+varying vec2 vUv;
+varying vec2 ssCoords;
+
 uniform vec2 uTextureSize;
 uniform vec2 uQuadSize;
-uniform float uViewportY;
+uniform float u_progress;
+uniform bool u_enableBend;
+
+void main() {
+  vec3 pos = position;
+
+  mat4 MVPM = projectionMatrix * modelViewMatrix;
+  vec4 originalPosition = MVPM * vec4(position, 1.0);
+  ssCoords = vec2(originalPosition.xy / originalPosition.w);
+
+  if (u_enableBend) {
+    float startAt = uv.y - 0.5;
+    float finishAt = uv.y;
+    float bend = smoothstep(startAt, finishAt, 1.0 - u_progress);
+    pos.x *= 1.0 + (bend * 0.08) * abs(ssCoords.x);
+    pos.z += bend * 14.0;
+  }
+
+  vUv = uv;
+  gl_Position = MVPM * vec4(pos, 1.0);
+}
+`;
+
+const imgFragShader = /* glsl */ `
+precision highp float;
+
+uniform sampler2D uTexture;
+uniform vec2 uTextureSize;
+uniform vec2 uQuadSize;
+uniform float u_opacity;
+uniform float u_innerScale;
+uniform float u_innerY;
+uniform float u_edgeFade;
 
 varying vec2 vUv;
-varying vec2 vUvCover;
+varying vec2 ssCoords;
 
 vec2 getCoverUv(vec2 uv, vec2 textureSize, vec2 quadSize) {
   vec2 ratio = vec2(
@@ -78,32 +113,28 @@ vec2 getCoverUv(vec2 uv, vec2 textureSize, vec2 quadSize) {
 }
 
 void main() {
-  vUv = uv;
-  vUvCover = getCoverUv(uv, uTextureSize, uQuadSize);
+  vec2 uv = getCoverUv(vUv, uTextureSize, uQuadSize);
 
-  vec3 pos = position;
+  // Parallax: inner scale + Y offset
+  vec2 scaleOrigin = vec2(0.5);
+  uv = (uv - scaleOrigin) / u_innerScale + scaleOrigin;
+  uv.y += u_innerY;
 
-  // Strong when entering from bottom, fades to flat at center of screen
-  float effect = smoothstep(0.2, 0.9, uViewportY);
+  vec4 color = texture2D(uTexture, uv);
 
-  // Bottom of image curves towards camera
-  float t = 1.0 - uv.y;
-  pos.z += t * t * effect * 150.0;
+  // Edge color shift (chromatic aberration at edges)
+  float thresholdLeft = smoothstep(-0.85, -1.0, ssCoords.x) * u_edgeFade;
+  float thresholdRight = smoothstep(0.85, 1.0, ssCoords.x) * u_edgeFade;
+  float thresholdTop = smoothstep(0.85, 1.0, ssCoords.y) * u_edgeFade;
+  float thresholdBottom = smoothstep(-0.85, -1.0, ssCoords.y) * u_edgeFade;
+  float threshold = thresholdLeft + thresholdRight + thresholdBottom + thresholdTop;
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-}
-`;
+  float colorShiftR = texture2D(uTexture, uv + vec2(0.0, 0.003)).r;
+  float colorShiftG = texture2D(uTexture, uv - vec2(0.0, 0.003)).g;
+  color.r = mix(color.r, colorShiftR, threshold);
+  color.g = mix(color.g, colorShiftG, threshold);
 
-const imgFragShader = /* glsl */ `
-precision highp float;
-
-uniform sampler2D uTexture;
-
-varying vec2 vUvCover;
-
-void main() {
-  vec4 tex = texture2D(uTexture, vUvCover);
-  gl_FragColor = tex;
+  gl_FragColor = vec4(color.rgb, color.a * u_opacity);
 }
 `;
 
@@ -126,6 +157,7 @@ interface ImageEntry {
   mesh: THREE.Mesh;
   element: HTMLImageElement;
   material: THREE.ShaderMaterial;
+  effect: string;
   width: number;
   height: number;
   top: number;
@@ -148,6 +180,18 @@ export default function TextDemo() {
       const {Text} = await import('troika-three-text');
       const {getLenisInstance} = await import('~/lib/lenis');
       const gsap = (await import('gsap')).default;
+      const {ScrollTrigger} = await import('gsap/ScrollTrigger');
+      const {EffectComposer} = await import(
+        'three/examples/jsm/postprocessing/EffectComposer.js'
+      );
+      const {RenderPass} = await import(
+        'three/examples/jsm/postprocessing/RenderPass.js'
+      );
+      const {ShaderPass} = await import(
+        'three/examples/jsm/postprocessing/ShaderPass.js'
+      );
+
+      gsap.registerPlugin(ScrollTrigger);
 
       if (cancelled) return;
 
@@ -280,10 +324,17 @@ export default function TextDemo() {
       for (const img of mediaElements) {
         const texture = await textureLoader.loadAsync(img.src);
         const bounds = img.getBoundingClientRect();
+        const effect = img.dataset.webglEffect || 'none';
+
+        // Set initial uniforms based on effect type
+        const hasBend = effect === 'bend' || effect === 'distort';
+        const hasParallax = effect === 'parallax';
+        const hasDistort = effect === 'distort';
 
         const imgMaterial = new THREE.ShaderMaterial({
           vertexShader: imgVertShader,
           fragmentShader: imgFragShader,
+          transparent: true,
           uniforms: {
             uTexture: {value: texture},
             uTextureSize: {
@@ -295,7 +346,12 @@ export default function TextDemo() {
             uQuadSize: {
               value: new THREE.Vector2(bounds.width, bounds.height),
             },
-            uViewportY: {value: 0},
+            u_progress: {value: 0},
+            u_enableBend: {value: hasBend},
+            u_innerScale: {value: 1.0},
+            u_innerY: {value: hasParallax ? -0.04 : 0.0},
+            u_opacity: {value: 1},
+            u_edgeFade: {value: hasDistort ? 1.0 : 0.0},
           },
         });
 
@@ -309,12 +365,135 @@ export default function TextDemo() {
           mesh: imgMesh,
           element: img,
           material: imgMaterial,
+          effect,
           width: bounds.width,
           height: bounds.height,
           top: bounds.top + lenis.actualScroll,
           left: bounds.left,
         });
+
+        console.log(`[WebGL] Image ${img.src} | effect: ${effect} | innerScale: ${imgMaterial.uniforms.u_innerScale.value} | enableBend: ${imgMaterial.uniforms.u_enableBend.value}`);
       }
+
+      /* ── ScrollTrigger animations per image (based on effect type) ── */
+
+      images.forEach((img) => {
+        const {effect} = img;
+
+        // "bend" or "distort": animate u_progress for the vertex bend
+        if (effect === 'bend' || effect === 'distort') {
+          gsap.to(img.material.uniforms.u_progress, {
+            value: 1.5,
+            ease: 'sine.out',
+            scrollTrigger: {
+              trigger: img.element,
+              scrub: true,
+              start: 'top bottom',
+              end: 'bottom 70%',
+            },
+          });
+        }
+
+        // "parallax": inner Y pan + inner scale zoom
+        if (effect === 'parallax') {
+          gsap.fromTo(
+            img.material.uniforms.u_innerY,
+            {value: -0.04},
+            {
+              value: 0.04,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: img.element,
+                scrub: true,
+                start: 'top bottom',
+                end: 'bottom top',
+              },
+            },
+          );
+          gsap.fromTo(
+            img.material.uniforms.u_innerScale,
+            {value: 1.03},
+            {
+              value: 1.0,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: img.element,
+                scrub: true,
+                start: 'top bottom',
+                end: 'bottom top',
+              },
+            },
+          );
+        }
+
+        // "distort": also zoom in + chromatic aberration is already on via u_edgeFade
+        if (effect === 'distort') {
+          gsap.fromTo(
+            img.material.uniforms.u_innerScale,
+            {value: 1.03},
+            {
+              value: 1.0,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: img.element,
+                scrub: true,
+                start: 'top bottom',
+                end: 'bottom top',
+              },
+            },
+          );
+        }
+      });
+
+      /* ── Barrel distortion post-processing ── */
+
+      const barrelShader = {
+        uniforms: {
+          tDiffuse: {value: null},
+          u_bendAmount: {value: -0.03},
+          u_maxDistort: {value: 0.1},
+        },
+        vertexShader: /* glsl */ `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: /* glsl */ `
+          precision highp float;
+          uniform sampler2D tDiffuse;
+          uniform float u_bendAmount;
+          uniform float u_maxDistort;
+          varying vec2 vUv;
+
+          vec2 barrelDistort(vec2 coord, float amt) {
+            vec2 cc = coord - 0.5;
+            float dist = dot(cc, cc);
+            return coord + cc * dist * amt;
+          }
+
+          void main() {
+            vec2 uv = vUv;
+            float rDist = u_maxDistort * u_bendAmount;
+            float gDist = u_maxDistort * u_bendAmount * 0.7;
+            float bDist = u_maxDistort * u_bendAmount * 0.4;
+
+            float r = texture2D(tDiffuse, barrelDistort(uv, rDist)).r;
+            float g = texture2D(tDiffuse, barrelDistort(uv, gDist)).g;
+            float b = texture2D(tDiffuse, barrelDistort(uv, bDist)).b;
+            float a = texture2D(tDiffuse, barrelDistort(uv, gDist)).a;
+
+            gl_FragColor = vec4(r, g, b, a);
+          }
+        `,
+      };
+
+      const composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      const barrelPass = new ShaderPass(barrelShader);
+      barrelPass.renderToScreen = true;
+      composer.addPass(barrelPass);
 
       /* ── Render loop ── */
 
@@ -331,7 +510,7 @@ export default function TextDemo() {
           }
         });
 
-        // Update image positions + bottom curve
+        // Update image positions (ScrollTrigger handles the animation)
         images.forEach((img) => {
           img.mesh.position.x =
             img.left - screen.width / 2 + img.width / 2;
@@ -340,17 +519,9 @@ export default function TextDemo() {
             lenis.animatedScroll +
             screen.height / 2 -
             img.height / 2;
-
-          // Normalized viewport Y: 0 = top of screen, 1 = bottom
-          const imgScreenY = img.top - lenis.animatedScroll;
-          const imgCenterY = imgScreenY + img.height / 2;
-          const viewportY = imgCenterY / screen.height;
-          img.material.uniforms.uViewportY.value = viewportY;
-
-          img.mesh.scale.set(img.width, img.height, 1);
         });
 
-        renderer.render(scene, camera);
+        composer.render();
         animationId = requestAnimationFrame(update);
       };
 
@@ -397,6 +568,8 @@ export default function TextDemo() {
             bounds.height,
           );
         });
+
+        composer.setSize(screen.width, screen.height);
       };
 
       window.addEventListener('resize', resizeHandler);
@@ -423,32 +596,36 @@ export default function TextDemo() {
         <figure className={styles.figure}>
           <img
             data-webgl-media
+            data-webgl-effect="none"
             src="/images/1.jpg"
-            alt="Bodista visual 1"
+            alt="Foto 1 — geen effect"
             className={styles.gridImage}
           />
         </figure>
         <figure className={styles.figure}>
           <img
             data-webgl-media
+            data-webgl-effect="distort"
             src="/images/2.jpg"
-            alt="Bodista visual 2"
+            alt="Foto 2 — distort + zoom"
             className={styles.gridImage}
           />
         </figure>
         <figure className={styles.figure}>
           <img
             data-webgl-media
+            data-webgl-effect="parallax"
             src="/images/3.jpg"
-            alt="Bodista visual 3"
+            alt="Foto 3 — parallax"
             className={styles.gridImage}
           />
         </figure>
         <figure className={styles.figure}>
           <img
             data-webgl-media
+            data-webgl-effect="bend"
             src="/images/4.jpg"
-            alt="Bodista visual 4"
+            alt="Foto 4 — bend/peel"
             className={styles.gridImage}
           />
         </figure>
