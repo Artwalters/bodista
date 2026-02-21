@@ -1,35 +1,34 @@
 import {Await, useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/_index';
 import {Suspense} from 'react';
-import {Image} from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
 } from 'storefrontapi.generated';
-import {ProductItem} from '~/components/ProductItem';
+import {HeroHeader} from '~/components/home/HeroHeader';
+import {MarqueeBanner} from '~/components/home/MarqueeBanner';
+import {LiquidGold} from '~/components/home/LiquidGold';
+import {BrandPhilosophy} from '~/components/home/BrandPhilosophy';
+import {ProductHighlights} from '~/components/home/ProductHighlights';
+import {RitualAdvocates} from '~/components/home/RitualAdvocates';
+import {FeaturedProduct} from '~/components/home/FeaturedProduct';
+import {TestimonialBanner} from '~/components/home/TestimonialBanner';
+import {SocialGrid} from '~/components/home/SocialGrid';
+import {BlogPreview} from '~/components/home/BlogPreview';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Hydrogen | Home'}];
+  return [{title: 'Bodista | Begin Your Ritual'}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
   return {...deferredData, ...criticalData};
 }
 
-/**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- */
 async function loadCriticalData({context}: Route.LoaderArgs) {
   const [{collections}] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
-    // Add other queries here, so that they are loaded in parallel
   ]);
 
   return {
@@ -37,16 +36,10 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   };
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
 function loadDeferredData({context}: Route.LoaderArgs) {
   const recommendedProducts = context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY)
     .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
       console.error(error);
       return null;
     });
@@ -60,56 +53,29 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
-      <RecommendedProducts products={data.recommendedProducts} />
-    </div>
-  );
-}
-
-function FeaturedCollection({
-  collection,
-}: {
-  collection: FeaturedCollectionFragment;
-}) {
-  if (!collection) return null;
-  const image = collection?.image;
-  return (
-    <Link
-      className="featured-collection"
-      to={`/collections/${collection.handle}`}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
-        </div>
-      )}
-      <h1>{collection.title}</h1>
-    </Link>
-  );
-}
-
-function RecommendedProducts({
-  products,
-}: {
-  products: Promise<RecommendedProductsQuery | null>;
-}) {
-  return (
-    <div className="recommended-products">
-      <h2>Recommended Products</h2>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Await resolve={products}>
-          {(response) => (
-            <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product) => (
-                    <ProductItem key={product.id} product={product} />
-                  ))
-                : null}
-            </div>
-          )}
+      <HeroHeader collection={data.featuredCollection} />
+      <MarqueeBanner />
+      <LiquidGold />
+      <BrandPhilosophy />
+      <Suspense fallback={<div />}>
+        <Await resolve={data.recommendedProducts}>
+          {(response) => {
+            const products = response?.products.nodes ?? [];
+            const highlights = products.slice(0, 3);
+            const featured = products[3] ?? products[0];
+            return (
+              <>
+                <ProductHighlights products={highlights} />
+                <RitualAdvocates />
+                {featured && <FeaturedProduct product={featured} />}
+              </>
+            );
+          }}
         </Await>
       </Suspense>
-      <br />
+      <TestimonialBanner />
+      <SocialGrid />
+      <BlogPreview />
     </div>
   );
 }

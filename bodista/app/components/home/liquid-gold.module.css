@@ -1,0 +1,42 @@
+.section {
+  padding: 80px 24px;
+}
+
+.videoWrapper {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.videoPlaceholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #c8c8c8;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #fff;
+  text-align: center;
+  padding: 24px;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 48px 16px;
+  }
+
+  .text {
+    font-size: 1.25rem;
+  }
+}

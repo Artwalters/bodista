@@ -1,0 +1,47 @@
+.section {
+  padding: 80px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: 300;
+  margin: 0 0 24px;
+  color: #1a1a1a;
+}
+
+.body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #555;
+  margin: 0 0 16px;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background-color: #d1d1d1;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .section {
+    padding: 48px 16px;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+  }
+}

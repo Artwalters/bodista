@@ -1,0 +1,47 @@
+.section {
+  padding: 64px 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.track {
+  display: flex;
+  gap: 1px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testimonial {
+  flex: 0 0 240px;
+  padding: 24px 32px;
+  margin: 0;
+  border-right: 1px solid #e0e0e0;
+}
+
+.testimonial:last-child {
+  border-right: none;
+}
+
+.quote {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #444;
+  margin: 0 0 16px;
+  font-style: italic;
+}
+
+.author {
+  font-size: 0.8125rem;
+  color: #999;
+  font-style: normal;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 48px 16px;
+  }
+
+  .testimonial {
+    flex: 0 0 200px;
+  }
+}

@@ -48,7 +48,7 @@
   --cart-aside-summary-height-with-discount: 18.75em;
   --cart-aside-summary-height: 15.625em;
   --grid-item-width: 22.1875em;
-  --header-height: 4em;
+  --header-height: 3em;
   --color-dark: #000;
   --color-light: #fff;
 }
@@ -376,10 +376,11 @@ aside li {
   background: #fff;
   display: flex;
   height: var(--header-height);
-  padding: 0 1em;
+  padding: 0 1.25em;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 999;
+  font-size: 0.8125rem;
 }
 
 .header-menu-mobile-toggle {
@@ -396,11 +397,11 @@ aside li {
 
 .header-menu-desktop {
   display: none;
-  grid-gap: 1em;
+  grid-gap: 0.75em;
   @media (min-width: 45em) {
     display: flex;
-    grid-gap: 1em;
-    margin-left: 3em;
+    grid-gap: 0.75em;
+    margin-left: 2em;
   }
 }
 
@@ -411,7 +412,7 @@ aside li {
 .header-ctas {
   align-items: center;
   display: flex;
-  grid-gap: 1em;
+  grid-gap: 0.75em;
   margin-left: auto;
 }
 

@@ -1,0 +1,105 @@
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('/fonts/BebasNeue-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.page {
+  background: #fff;
+  min-height: 300vh;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 3em);
+  padding: 4em 2em;
+}
+
+.heroText {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 12vw, 12rem);
+  font-weight: 400;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0;
+  max-width: 900px;
+  line-height: 0.95;
+}
+
+.content {
+  width: 100%;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.825vw;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .content {
+    font-size: 2vw;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 70em;
+  gap: 40em;
+  padding: 12em 0;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    padding: 6em 0;
+    gap: 24em;
+  }
+}
+
+.sectionHeading,
+.sectionMain,
+.sectionFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sectionMain {
+  gap: 10em;
+}
+
+.text1,
+.text2,
+.text3 {
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0;
+}
+
+.text1 {
+  font-size: 19.4em;
+  font-weight: 400;
+  max-width: 45em;
+}
+
+@media (max-width: 768px) {
+  .text1 {
+    font-size: 13.979em;
+  }
+}
+
+.text2 {
+  font-size: 4.9em;
+  max-width: 7.6em;
+  letter-spacing: 0.01em;
+}
+
+.text3 {
+  font-size: 13.979em;
+  max-width: 2.4em;
+}

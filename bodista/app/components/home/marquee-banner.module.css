@@ -1,0 +1,33 @@
+.banner {
+  overflow: hidden;
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 14px 0;
+  white-space: nowrap;
+}
+
+.track {
+  display: inline-flex;
+  animation: scroll 20s linear infinite;
+}
+
+.phrase {
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.separator {
+  margin: 0 24px;
+  opacity: 0.4;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

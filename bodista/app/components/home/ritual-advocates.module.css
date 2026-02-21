@@ -1,0 +1,64 @@
+.section {
+  padding: 80px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: 300;
+  text-align: center;
+  margin: 0 0 48px;
+  color: #1a1a1a;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.card {
+  text-align: center;
+}
+
+.videoPlaceholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: #c8c8c8;
+  margin-bottom: 16px;
+}
+
+.name {
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0 0 4px;
+  color: #1a1a1a;
+}
+
+.link {
+  font-size: 0.875rem;
+  color: #666;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #1a1a1a;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .section {
+    padding: 48px 16px;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+    margin-bottom: 32px;
+  }
+}

@@ -15,6 +15,7 @@ import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import globalStyles from '~/styles/global.css?url';
 import {PageLayout} from './components/PageLayout';
+import {SmoothScroll} from './components/SmoothScroll';
 
 export type RootLoader = typeof loader;
 
@@ -153,6 +154,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <Links />
       </head>
       <body>
+        <SmoothScroll />
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
