@@ -2,7 +2,9 @@ import {useEffect} from 'react';
 import type {Route} from './+types/text-demo';
 import styles from '~/styles/text-demo.module.css';
 
-const FONT_URL = '/fonts/BebasNeue-Regular.ttf';
+const FONT_SANS = '/fonts/BebasNeue-Regular.ttf';
+const FONT_SERIF = '/fonts/SourceSerif4-Regular.ttf';
+const FONT_SERIF_ITALIC = '/fonts/SourceSerif4-It.ttf';
 
 /* ── Text Shaders ── */
 
@@ -259,9 +261,20 @@ export default function TextDemo() {
           },
         });
 
+        // Pick font based on CSS font-family and font-style
+        const fontFamily = computed.fontFamily.toLowerCase();
+        const isItalic = computed.fontStyle === 'italic';
+        const isSerif =
+          fontFamily.includes('source serif') ||
+          fontFamily.includes('georgia') ||
+          fontFamily.includes('times') ||
+          (fontFamily.endsWith('serif') && !fontFamily.includes('sans-serif'));
+        let fontUrl = FONT_SANS;
+        if (isSerif) fontUrl = isItalic ? FONT_SERIF_ITALIC : FONT_SERIF;
+
         const mesh = new Text();
         mesh.text = element.innerText;
-        mesh.font = FONT_URL;
+        mesh.font = fontUrl;
         mesh.anchorX = '0%';
         mesh.anchorY = '50%';
         mesh.material = material;
@@ -283,16 +296,33 @@ export default function TextDemo() {
         texts.push({mesh, element, material, bounds, y, isVisible: false});
       });
 
-      /* ── Noise reveal animation on page load ── */
+      /* ── Noise reveal animations ── */
 
       texts.forEach((t) => {
         t.isVisible = true;
-        gsap.to(t.material.uniforms.uReveal, {
-          value: 1,
-          duration: 2.5,
-          delay: 0.3,
-          ease: 'power2.inOut',
-        });
+        const isInHero = t.element.closest(`.${styles.hero}`);
+
+        if (isInHero) {
+          // Hero text: reveal on page load
+          gsap.to(t.material.uniforms.uReveal, {
+            value: 1,
+            duration: 2.5,
+            delay: 0.3,
+            ease: 'power2.inOut',
+          });
+        } else {
+          // Other text: reveal on scroll into view
+          gsap.to(t.material.uniforms.uReveal, {
+            value: 1,
+            duration: 2.5,
+            ease: 'power2.inOut',
+            scrollTrigger: {
+              trigger: t.element,
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
+          });
+        }
       });
 
       /* ── WebGL images ── */
@@ -611,6 +641,15 @@ export default function TextDemo() {
             className={styles.gridImage}
           />
         </figure>
+        <section className={styles.approachSection}>
+          <p data-animation="webgl-text" className={styles.approachLabel}>
+            Our approach
+          </p>
+          <h2 data-animation="webgl-text" className={styles.approachText}>
+            A global leader in groundbreaking digital design and strategy, we
+            help forward-thinking clients achieve impact and growth.
+          </h2>
+        </section>
         <figure className={styles.figure}>
           <img
             data-webgl-media
