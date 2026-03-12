@@ -1,7 +1,6 @@
 import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import type {FeaturedCollectionFragment} from 'storefrontapi.generated';
-import styles from './hero-header.module.css';
 
 export function HeroHeader({
   collection,
@@ -9,25 +8,25 @@ export function HeroHeader({
   collection: FeaturedCollectionFragment;
 }) {
   return (
-    <section className={styles.hero}>
-      <div className={styles.videoPlaceholder}>
+    <section className="hero">
+      <div className="hero-backdrop">
         {collection?.image && (
           <Image
             data={collection.image}
             sizes="100vw"
-            className={styles.bgImage}
+            className="hero-bg-image"
           />
         )}
-        <div className={styles.content}>
-          <h1 className={styles.headline}>Begin Your Ritual</h1>
-          <p className={styles.subtext}>
+        <div className="hero-content">
+          <h1 className="hero-headline">Begin Your Ritual</h1>
+          <p className="hero-subtext">
             Discover the art of oil-based body care — crafted for those who
             believe self-care is a daily ceremony.
           </p>
           {collection && (
             <Link
               to={`/collections/${collection.handle}`}
-              className={styles.cta}
+              className="hero-cta"
             >
               Shop {collection.title}
             </Link>

@@ -1,5 +1,3 @@
-import styles from './marquee-banner.module.css';
-
 const phrases = [
   'Pure Ingredients',
   'Oil-Based Rituals',
@@ -11,12 +9,12 @@ export function MarqueeBanner() {
   const repeated = [...phrases, ...phrases, ...phrases, ...phrases];
 
   return (
-    <section className={styles.banner}>
-      <div className={styles.track}>
+    <section className="marquee">
+      <div className="marquee-track">
         {repeated.map((phrase, i) => (
-          <span key={i} className={styles.phrase}>
+          <span key={i} className="marquee-phrase">
             {phrase}
-            <span className={styles.separator}>&mdash;</span>
+            <span className="marquee-separator">&mdash;</span>
           </span>
         ))}
       </div>

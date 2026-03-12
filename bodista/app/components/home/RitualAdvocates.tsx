@@ -1,5 +1,3 @@
-import styles from './ritual-advocates.module.css';
-
 const advocates = [
   {name: 'Amara J.'},
   {name: 'Léa M.'},
@@ -9,14 +7,14 @@ const advocates = [
 
 export function RitualAdvocates() {
   return (
-    <section className={styles.section}>
-      <h2 className={styles.heading}>Ritual Advocates</h2>
-      <div className={styles.grid}>
+    <section className="advocates">
+      <h2 className="advocates-heading">Ritual Advocates</h2>
+      <div className="advocates-grid">
         {advocates.map((advocate) => (
-          <div key={advocate.name} className={styles.card}>
-            <div className={styles.videoPlaceholder} />
-            <p className={styles.name}>{advocate.name}</p>
-            <a href="#" className={styles.link}>
+          <div key={advocate.name} className="advocates-card">
+            <div className="advocates-video" />
+            <p className="advocates-name">{advocate.name}</p>
+            <a href="#" className="advocates-link">
               Watch Ritual &rarr;
             </a>
           </div>

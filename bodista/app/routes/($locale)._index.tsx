@@ -1,20 +1,8 @@
-import {Await, useLoaderData, Link} from 'react-router';
+import {Await, useLoaderData} from 'react-router';
 import type {Route} from './+types/_index';
 import {Suspense} from 'react';
-import type {
-  FeaturedCollectionFragment,
-  RecommendedProductsQuery,
-} from 'storefrontapi.generated';
 import {HeroHeader} from '~/components/home/HeroHeader';
-import {MarqueeBanner} from '~/components/home/MarqueeBanner';
-import {LiquidGold} from '~/components/home/LiquidGold';
-import {BrandPhilosophy} from '~/components/home/BrandPhilosophy';
 import {ProductHighlights} from '~/components/home/ProductHighlights';
-import {RitualAdvocates} from '~/components/home/RitualAdvocates';
-import {FeaturedProduct} from '~/components/home/FeaturedProduct';
-import {TestimonialBanner} from '~/components/home/TestimonialBanner';
-import {SocialGrid} from '~/components/home/SocialGrid';
-import {BlogPreview} from '~/components/home/BlogPreview';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'Bodista | Begin Your Ritual'}];
@@ -54,28 +42,14 @@ export default function Homepage() {
   return (
     <div className="home">
       <HeroHeader collection={data.featuredCollection} />
-      <MarqueeBanner />
-      <LiquidGold />
-      <BrandPhilosophy />
       <Suspense fallback={<div />}>
         <Await resolve={data.recommendedProducts}>
           {(response) => {
             const products = response?.products.nodes ?? [];
-            const highlights = products.slice(0, 3);
-            const featured = products[3] ?? products[0];
-            return (
-              <>
-                <ProductHighlights products={highlights} />
-                <RitualAdvocates />
-                {featured && <FeaturedProduct product={featured} />}
-              </>
-            );
+            return <ProductHighlights products={products} />;
           }}
         </Await>
       </Suspense>
-      <TestimonialBanner />
-      <SocialGrid />
-      <BlogPreview />
     </div>
   );
 }

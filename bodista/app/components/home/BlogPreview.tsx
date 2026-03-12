@@ -1,5 +1,3 @@
-import styles from './blog-preview.module.css';
-
 const posts = [
   {
     title: 'Why Oil-Based Care Outperforms Water-Based Lotions',
@@ -20,15 +18,15 @@ const posts = [
 
 export function BlogPreview() {
   return (
-    <section className={styles.section}>
-      <h2 className={styles.heading}>The Bodista Library</h2>
-      <div className={styles.grid}>
+    <section className="blog-preview">
+      <h2 className="blog-preview-heading">The Bodista Library</h2>
+      <div className="blog-preview-grid">
         {posts.map((post) => (
-          <article key={post.title} className={styles.card}>
-            <div className={styles.imagePlaceholder} />
-            <h3 className={styles.title}>{post.title}</h3>
-            <p className={styles.excerpt}>{post.excerpt}</p>
-            <a href="/blogs" className={styles.link}>
+          <article key={post.title} className="blog-preview-card">
+            <div className="blog-preview-image" />
+            <h3 className="blog-preview-title">{post.title}</h3>
+            <p className="blog-preview-excerpt">{post.excerpt}</p>
+            <a href="/blogs" className="blog-preview-link">
               Read More &rarr;
             </a>
           </article>

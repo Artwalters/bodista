@@ -1,5 +1,3 @@
-import styles from './testimonial-banner.module.css';
-
 const testimonials = [
   {
     quote: 'The Ritual Oil changed how I start my mornings. My skin has never felt this alive.',
@@ -25,12 +23,12 @@ const testimonials = [
 
 export function TestimonialBanner() {
   return (
-    <section className={styles.section}>
-      <div className={styles.track}>
+    <section className="testimonials">
+      <div className="testimonials-track">
         {testimonials.map((t) => (
-          <blockquote key={t.author} className={styles.testimonial}>
-            <p className={styles.quote}>&ldquo;{t.quote}&rdquo;</p>
-            <cite className={styles.author}>{t.author}</cite>
+          <blockquote key={t.author} className="testimonial">
+            <p className="testimonial-quote">&ldquo;{t.quote}&rdquo;</p>
+            <cite className="testimonial-author">{t.author}</cite>
           </blockquote>
         ))}
       </div>

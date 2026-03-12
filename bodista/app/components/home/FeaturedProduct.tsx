@@ -1,7 +1,6 @@
 import {Link} from 'react-router';
 import {Image, Money} from '@shopify/hydrogen';
 import type {RecommendedProductFragment} from 'storefrontapi.generated';
-import styles from './featured-product.module.css';
 
 export function FeaturedProduct({
   product,
@@ -9,27 +8,27 @@ export function FeaturedProduct({
   product: RecommendedProductFragment;
 }) {
   return (
-    <section className={styles.section}>
-      <div className={styles.grid}>
-        <div className={styles.imageCol}>
+    <section className="featured">
+      <div className="featured-grid">
+        <div>
           {product.featuredImage ? (
             <Image
               data={product.featuredImage}
               aspectRatio="4/5"
               sizes="(min-width: 768px) 50vw, 100vw"
-              className={styles.image}
+              className="featured-image"
             />
           ) : (
-            <div className={styles.imagePlaceholder} />
+            <div className="featured-image-placeholder" />
           )}
         </div>
-        <div className={styles.infoCol}>
-          <p className={styles.label}>Featured</p>
-          <h2 className={styles.productName}>{product.title}</h2>
-          <p className={styles.price}>
+        <div>
+          <p className="featured-label">Featured</p>
+          <h2 className="featured-product-name">{product.title}</h2>
+          <p className="featured-price">
             <Money data={product.priceRange.minVariantPrice} />
           </p>
-          <p className={styles.description}>
+          <p className="featured-description">
             Our signature full-body oil. A blend of cold-pressed jojoba,
             rosehip, and sweet almond oil — designed to absorb instantly while
             leaving skin impossibly soft. The scent is subtle: warm, botanical,
@@ -37,7 +36,7 @@ export function FeaturedProduct({
           </p>
           <Link
             to={`/products/${product.handle}`}
-            className={styles.cta}
+            className="featured-cta"
           >
             Add to Ritual
           </Link>

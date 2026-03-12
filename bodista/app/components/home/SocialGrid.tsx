@@ -1,5 +1,3 @@
-import styles from './social-grid.module.css';
-
 const posts = [
   {caption: 'Morning light, golden skin.'},
   {caption: 'The ritual never gets old.'},
@@ -13,13 +11,13 @@ const posts = [
 
 export function SocialGrid() {
   return (
-    <section className={styles.section}>
-      <h2 className={styles.heading}>@bodista</h2>
-      <div className={styles.grid}>
+    <section className="social">
+      <h2 className="social-heading">@bodista</h2>
+      <div className="social-grid">
         {posts.map((post) => (
-          <div key={post.caption} className={styles.item}>
-            <div className={styles.imagePlaceholder} />
-            <p className={styles.caption}>{post.caption}</p>
+          <div key={post.caption} className="social-item">
+            <div className="social-image" />
+            <p className="social-caption">{post.caption}</p>
           </div>
         ))}
       </div>

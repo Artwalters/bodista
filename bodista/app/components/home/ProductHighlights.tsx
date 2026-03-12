@@ -1,7 +1,6 @@
 import {Link} from 'react-router';
 import {Image, Money} from '@shopify/hydrogen';
 import type {RecommendedProductFragment} from 'storefrontapi.generated';
-import styles from './product-highlights.module.css';
 
 export function ProductHighlights({
   products,
@@ -11,29 +10,29 @@ export function ProductHighlights({
   if (!products.length) return null;
 
   return (
-    <section className={styles.section}>
-      <h2 className={styles.heading}>Our Essentials</h2>
-      <div className={styles.grid}>
+    <section className="highlights">
+      <h2 className="highlights-heading">Our Essentials</h2>
+      <div className="highlights-grid">
         {products.map((product) => (
           <Link
             key={product.id}
             to={`/products/${product.handle}`}
-            className={styles.card}
+            className="highlights-card"
           >
-            <div className={styles.imageWrapper}>
+            <div className="highlights-image-wrapper">
               {product.featuredImage ? (
                 <Image
                   data={product.featuredImage}
                   aspectRatio="3/4"
                   sizes="(min-width: 768px) 33vw, 100vw"
-                  className={styles.image}
+                  className="highlights-image"
                 />
               ) : (
-                <div className={styles.imagePlaceholder} />
+                <div className="highlights-image-placeholder" />
               )}
             </div>
-            <h3 className={styles.productName}>{product.title}</h3>
-            <p className={styles.price}>
+            <h3 className="highlights-product-name">{product.title}</h3>
+            <p className="highlights-price">
               <Money data={product.priceRange.minVariantPrice} />
             </p>
           </Link>
