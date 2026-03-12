@@ -1,10 +1,9 @@
-import {useEffect} from 'react';
+import {useEffect, useState, useCallback, useRef} from 'react';
 import type {Route} from './+types/text-demo';
 import styles from '~/styles/text-demo.module.css';
 
-const FONT_SANS = '/fonts/BebasNeue-Regular.ttf';
-const FONT_SERIF = '/fonts/SourceSerif4-Regular.ttf';
-const FONT_SERIF_ITALIC = '/fonts/SourceSerif4-It.ttf';
+const FONT_DEFAULT = '/fonts/Novela-Regular.ttf';
+const FONT_ITALIC = '/fonts/Novela-RegularItalic.ttf';
 
 /* ── Text Shaders ── */
 
@@ -164,16 +163,30 @@ interface ImageEntry {
   height: number;
   top: number;
   left: number;
+  depth: number;
 }
 
 import type * as THREE from 'three';
 
 export default function TextDemo() {
+  const [webglEnabled, setWebglEnabled] = useState(true);
+  const cleanupRef = useCallback(() => {}, []);
+
   useEffect(() => {
+    if (!webglEnabled) {
+      document.body.classList.remove('webgl-active');
+      return;
+    }
+
+    document.body.classList.add('webgl-active');
+
     let animationId: number;
     let resizeHandler: (() => void) | undefined;
     let canvas: HTMLCanvasElement | undefined;
     let cancelled = false;
+
+    // Restore visibility on text/image elements when WebGL takes over
+    const restoreElements: Array<{el: HTMLElement; prop: string; val: string}> = [];
 
     const init = async () => {
       await document.fonts.ready;
@@ -261,16 +274,9 @@ export default function TextDemo() {
           },
         });
 
-        // Pick font based on CSS font-family and font-style
-        const fontFamily = computed.fontFamily.toLowerCase();
+        // Pick font based on font-style
         const isItalic = computed.fontStyle === 'italic';
-        const isSerif =
-          fontFamily.includes('source serif') ||
-          fontFamily.includes('georgia') ||
-          fontFamily.includes('times') ||
-          (fontFamily.endsWith('serif') && !fontFamily.includes('sans-serif'));
-        let fontUrl = FONT_SANS;
-        if (isSerif) fontUrl = isItalic ? FONT_SERIF_ITALIC : FONT_SERIF;
+        const fontUrl = isItalic ? FONT_ITALIC : FONT_DEFAULT;
 
         const mesh = new Text();
         mesh.text = element.innerText;
@@ -292,6 +298,7 @@ export default function TextDemo() {
 
         scene.add(mesh);
         element.style.color = 'transparent';
+        restoreElements.push({el: element, prop: 'color', val: ''});
 
         texts.push({mesh, element, material, bounds, y, isVisible: false});
       });
@@ -355,6 +362,7 @@ export default function TextDemo() {
         const texture = await textureLoader.loadAsync(img.src);
         const bounds = img.getBoundingClientRect();
         const effect = img.dataset.webglEffect || 'none';
+        const depth = parseFloat(img.dataset.webglDepth || '0');
 
         // Set initial uniforms based on effect type
         const hasBend = effect === 'bend' || effect === 'distort';
@@ -390,6 +398,7 @@ export default function TextDemo() {
         scene.add(imgMesh);
 
         img.style.visibility = 'hidden';
+        restoreElements.push({el: img, prop: 'visibility', val: ''});
 
         images.push({
           mesh: imgMesh,
@@ -400,9 +409,8 @@ export default function TextDemo() {
           height: bounds.height,
           top: bounds.top + lenis.actualScroll,
           left: bounds.left,
+          depth,
         });
-
-        console.log(`[WebGL] Image ${img.src} | effect: ${effect} | innerScale: ${imgMaterial.uniforms.u_innerScale.value} | enableBend: ${imgMaterial.uniforms.u_enableBend.value}`);
       }
 
       /* ── ScrollTrigger animations per image (based on effect type) ── */
@@ -531,12 +539,13 @@ export default function TextDemo() {
         // Update text positions
         texts.forEach((t) => {
           if (t.isVisible) {
+            t.mesh.position.x =
+              t.bounds.left - screen.width / 2;
             t.mesh.position.y =
               -t.y +
               lenis.animatedScroll +
               screen.height / 2 -
               t.bounds.height / 2;
-            t.mesh.position.x = t.bounds.left - screen.width / 2;
           }
         });
 
@@ -544,11 +553,24 @@ export default function TextDemo() {
         images.forEach((img) => {
           img.mesh.position.x =
             img.left - screen.width / 2 + img.width / 2;
+
+          // Depth-based parallax: images further from camera scroll slower
+          const parallaxFactor = 1 + img.depth * 0.0004;
           img.mesh.position.y =
             -img.top +
-            lenis.animatedScroll +
+            lenis.animatedScroll * parallaxFactor +
             screen.height / 2 -
             img.height / 2;
+
+          img.mesh.position.z = img.depth;
+
+          // Compensate perspective shrinking so deeper images stay visually large
+          const depthScale = DIST / (DIST - img.depth);
+          img.mesh.scale.set(
+            img.width * depthScale,
+            img.height * depthScale,
+            1,
+          );
         });
 
         composer.render();
@@ -612,11 +634,22 @@ export default function TextDemo() {
       if (animationId) cancelAnimationFrame(animationId);
       if (resizeHandler) window.removeEventListener('resize', resizeHandler);
       if (canvas) canvas.remove();
+      document.body.classList.remove('webgl-active');
+      restoreElements.forEach(({el, prop, val}) => {
+        el.style.setProperty(prop, val);
+      });
     };
-  }, []);
+  }, [webglEnabled]);
 
   return (
     <div className={styles.page}>
+      <button
+        className={styles.toggle}
+        onClick={() => setWebglEnabled((v) => !v)}
+      >
+        <span className={`${styles.toggleDot} ${!webglEnabled ? styles.toggleDotOff : ''}`} />
+        {webglEnabled ? 'WebGL on' : 'WebGL off'}
+      </button>
       <section className={styles.hero}>
         <h2 data-animation="webgl-text" className={styles.heroText}>
           BODISTA
@@ -669,6 +702,113 @@ export default function TextDemo() {
           />
         </figure>
       </section>
+
+      <OilSection />
     </div>
+  );
+}
+
+function OilSection() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dragState = useRef({isDragging: false, startX: 0, scrollLeft: 0});
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    const track = trackRef.current;
+    if (!track) return;
+    dragState.current = {isDragging: true, startX: e.clientX, scrollLeft: track.scrollLeft};
+    track.setPointerCapture(e.pointerId);
+    track.style.cursor = 'grabbing';
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragState.current.isDragging || !trackRef.current) return;
+    const dx = e.clientX - dragState.current.startX;
+    trackRef.current.scrollLeft = dragState.current.scrollLeft - dx;
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    dragState.current.isDragging = false;
+    if (trackRef.current) trackRef.current.style.cursor = 'grab';
+  };
+
+  return (
+    <section className={styles.oilSection}>
+      <div className={styles.oilContent}>
+        <div className={styles.oilText}>
+          <h2 data-animation="webgl-text" className={styles.oilHeading}>
+            What makes this oil work
+          </h2>
+          <p data-animation="webgl-text" className={styles.oilBody}>
+            Crafted with rare botanicals, our luxurious face oils nurture your
+            skin&rsquo;s natural radiance. These exquisite blends deliver
+            unparalleled healing, repair, and nourishment for a revitalized
+            complexion.
+          </p>
+        </div>
+        <div
+          ref={trackRef}
+          className={styles.oilImages}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerLeave={onPointerUp}
+        >
+          <div className={styles.oilImageCol}>
+            <img
+              data-webgl-media
+              data-webgl-effect="none"
+              data-webgl-depth="15"
+              src="/images/1.jpg"
+              alt=""
+              className={`${styles.oilImg} ${styles.oilImgLg}`}
+            />
+            <img
+              data-webgl-media
+              data-webgl-effect="none"
+              data-webgl-depth="-10"
+              src="/images/2.jpg"
+              alt=""
+              className={`${styles.oilImg} ${styles.oilImgSm}`}
+            />
+          </div>
+          <div className={`${styles.oilImageCol} ${styles.oilImageColOffset}`}>
+            <img
+              data-webgl-media
+              data-webgl-effect="none"
+              data-webgl-depth="25"
+              src="/images/3.jpg"
+              alt=""
+              className={`${styles.oilImg} ${styles.oilImgWide}`}
+            />
+            <img
+              data-webgl-media
+              data-webgl-effect="none"
+              data-webgl-depth="-5"
+              src="/images/4.jpg"
+              alt=""
+              className={`${styles.oilImg} ${styles.oilImgMd}`}
+            />
+          </div>
+          <div className={styles.oilImageCol}>
+            <img
+              data-webgl-media
+              data-webgl-effect="none"
+              data-webgl-depth="10"
+              src="/images/1.jpg"
+              alt=""
+              className={`${styles.oilImg} ${styles.oilImgMd}`}
+            />
+            <img
+              data-webgl-media
+              data-webgl-effect="none"
+              data-webgl-depth="30"
+              src="/images/3.jpg"
+              alt=""
+              className={`${styles.oilImg} ${styles.oilImgWide}`}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

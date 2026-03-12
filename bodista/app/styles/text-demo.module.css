@@ -1,26 +1,4 @@
-@font-face {
-  font-family: 'Bebas Neue';
-  src: url('/fonts/BebasNeue-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Source Serif 4';
-  src: url('/fonts/SourceSerif4-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Source Serif 4';
-  src: url('/fonts/SourceSerif4-It.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
+/* Fonts loaded via global.css */
 
 .page {
   background: #fff;
@@ -36,7 +14,7 @@
 }
 
 .heroText {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Novela', Georgia, serif;
   font-size: clamp(4rem, 12vw, 12rem);
   font-weight: 400;
   color: #1a1a1a;
@@ -48,7 +26,7 @@
 
 .content {
   width: 100%;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Novela', Georgia, serif;
   font-size: 0.825vw;
   display: flex;
   justify-content: center;
@@ -129,7 +107,7 @@
 }
 
 .approachLabel {
-  font-family: 'Source Serif 4', Georgia, serif;
+  font-family: 'Novela', Georgia, serif;
   font-style: italic;
   font-size: clamp(0.875rem, 1.2vw, 1.125rem);
   font-weight: 400;
@@ -139,7 +117,7 @@
 }
 
 .approachText {
-  font-family: 'Source Serif 4', Georgia, serif;
+  font-family: 'Novela', Georgia, serif;
   font-size: clamp(1.5rem, 3.5vw, 3.5rem);
   font-weight: 400;
   color: #1a1a1a;
@@ -168,4 +146,163 @@
   display: block;
   aspect-ratio: 16 / 9;
   object-fit: cover;
+}
+
+/* ==========================================================================
+   Oil Section
+   ========================================================================== */
+
+.oilSection {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 6rem 6vw;
+}
+
+.oilContent {
+  display: flex;
+  align-items: center;
+  gap: 6vw;
+  width: 100%;
+}
+
+.oilText {
+  flex: 0 0 28%;
+}
+
+.oilHeading {
+  font-family: 'Novela', Georgia, serif;
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 400;
+  color: #1a1a1a;
+  margin: 0 0 1.25em;
+  line-height: 1.2;
+}
+
+.oilBody {
+  font-family: 'Novela', Georgia, serif;
+  font-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
+  font-weight: 400;
+  color: #444;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.oilImages {
+  flex: 1;
+  display: flex;
+  gap: 5vw;
+  overflow-x: auto;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  user-select: none;
+  align-items: flex-start;
+}
+
+.oilImages::-webkit-scrollbar {
+  display: none;
+}
+
+.oilImageCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6vh;
+  flex-shrink: 0;
+}
+
+.oilImageColOffset {
+  margin-top: 14vh;
+}
+
+.oilImg {
+  object-fit: cover;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.oilImgSm {
+  width: 18vw;
+  aspect-ratio: 4 / 3;
+}
+
+.oilImgMd {
+  width: 18vw;
+  aspect-ratio: 4 / 3;
+}
+
+.oilImgLg {
+  width: 18vw;
+  aspect-ratio: 4 / 3;
+}
+
+.oilImgWide {
+  width: 18vw;
+  aspect-ratio: 4 / 3;
+}
+
+@media (max-width: 767px) {
+  .oilContent {
+    flex-direction: column;
+  }
+
+  .oilText {
+    flex: none;
+    width: 100%;
+  }
+
+  .oilImgSm {
+    width: 30vw;
+  }
+
+  .oilImgMd {
+    width: 38vw;
+  }
+
+  .oilImgLg {
+    width: 45vw;
+  }
+
+  .oilImgWide {
+    width: 34vw;
+  }
+}
+
+/* WebGL toggle */
+
+.toggle {
+  position: fixed;
+  bottom: 1.5em;
+  right: 1.5em;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 1em;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 2em;
+  font-family: 'Novela', Georgia, serif;
+  font-size: 0.8125em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle:hover {
+  background: #333;
+}
+
+.toggleDot {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: #4ade80;
+  transition: background 0.2s;
+}
+
+.toggleDotOff {
+  background: #f87171;
 }

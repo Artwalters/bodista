@@ -254,6 +254,16 @@ p {
   padding: 0;
 }
 
+.webgl-active [data-animation="webgl-text"]::selection {
+  color: transparent;
+  background: Highlight;
+}
+
+.webgl-active [data-animation="webgl-text"]::-moz-selection {
+  color: transparent;
+  background: Highlight;
+}
+
 a {
   text-decoration: none;
 }
