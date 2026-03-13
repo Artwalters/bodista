@@ -188,6 +188,7 @@ export default function TextDemo() {
     let resizeHandler: (() => void) | undefined;
     let canvas: HTMLCanvasElement | undefined;
     let cancelled = false;
+    let needsRender = true;
 
     // Restore visibility on text/image elements when WebGL takes over
     const restoreElements: Array<{el: HTMLElement; prop: string; val: string}> = [];
@@ -204,15 +205,18 @@ export default function TextDemo() {
       const {getLenisInstance} = await import('~/lib/lenis');
       const gsap = (await import('gsap')).default;
       const {ScrollTrigger} = await import('gsap/ScrollTrigger');
-      const {EffectComposer} = await import(
-        'three/examples/jsm/postprocessing/EffectComposer.js'
-      );
-      const {RenderPass} = await import(
-        'three/examples/jsm/postprocessing/RenderPass.js'
-      );
-      const {ShaderPass} = await import(
-        'three/examples/jsm/postprocessing/ShaderPass.js'
-      );
+      let EffectComposer: any, RenderPass: any, ShaderPass: any;
+      if (!isMobile) {
+        ({EffectComposer} = await import(
+          'three/examples/jsm/postprocessing/EffectComposer.js'
+        ));
+        ({RenderPass} = await import(
+          'three/examples/jsm/postprocessing/RenderPass.js'
+        ));
+        ({ShaderPass} = await import(
+          'three/examples/jsm/postprocessing/ShaderPass.js'
+        ));
+      }
 
       gsap.registerPlugin(ScrollTrigger);
 
@@ -224,8 +228,11 @@ export default function TextDemo() {
         return;
       }
 
+      lenis.on('scroll', () => { needsRender = true; });
+
       /* ── Screen & camera ── */
 
+      const isMobile = window.innerWidth < 768;
       const screen = {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -245,9 +252,12 @@ export default function TextDemo() {
 
       /* ── Renderer ── */
 
-      const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+      const renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: !isMobile,
+      });
       renderer.setSize(screen.width, screen.height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 
       canvas = renderer.domElement;
       canvas.style.cssText =
@@ -318,19 +328,19 @@ export default function TextDemo() {
         const isInHero = t.element.closest(`.${styles.hero}`);
 
         if (isInHero) {
-          // Hero text: reveal on page load
           gsap.to(t.material.uniforms.uReveal, {
             value: 1,
             duration: 2.5,
             delay: 0.3,
             ease: 'power2.inOut',
+            onUpdate: () => { needsRender = true; },
           });
         } else {
-          // Other text: reveal on scroll into view
           gsap.to(t.material.uniforms.uReveal, {
             value: 1,
             duration: 2.5,
             ease: 'power2.inOut',
+            onUpdate: () => { needsRender = true; },
             scrollTrigger: {
               trigger: t.element,
               start: 'top 80%',
@@ -346,7 +356,8 @@ export default function TextDemo() {
         '[data-webgl-media]',
       );
       const images: ImageEntry[] = [];
-      const imageGeometry = new THREE.PlaneGeometry(1, 1, 32, 32);
+      const subdivs = isMobile ? 16 : 32;
+      const imageGeometry = new THREE.PlaneGeometry(1, 1, subdivs, subdivs);
       const textureLoader = new THREE.TextureLoader();
 
       // Wait for all images to load
@@ -536,54 +547,60 @@ export default function TextDemo() {
         `,
       };
 
-      const composer = new EffectComposer(renderer);
-      composer.addPass(new RenderPass(scene, camera));
-      const barrelPass = new ShaderPass(barrelShader);
-      barrelPass.renderToScreen = true;
-      composer.addPass(barrelPass);
+      let composer: any = null;
+      if (!isMobile && EffectComposer) {
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        const barrelPass = new ShaderPass(barrelShader);
+        barrelPass.renderToScreen = true;
+        composer.addPass(barrelPass);
+      }
 
       /* ── Render loop ── */
 
       const update = () => {
-        // Update text positions
-        texts.forEach((t) => {
-          if (t.isVisible) {
-            t.mesh.position.x =
-              t.bounds.left - screen.width / 2;
-            t.mesh.position.y =
-              -t.y +
-              lenis.animatedScroll +
+        if (needsRender) {
+          texts.forEach((t) => {
+            if (t.isVisible) {
+              t.mesh.position.x =
+                t.bounds.left - screen.width / 2;
+              t.mesh.position.y =
+                -t.y +
+                lenis.animatedScroll +
+                screen.height / 2 -
+                t.bounds.height / 2;
+            }
+          });
+
+          images.forEach((img) => {
+            const dragOffset = img.isOilImage ? oilDragX : 0;
+            img.mesh.position.x =
+              img.left - screen.width / 2 + img.width / 2 - dragOffset;
+
+            const parallaxFactor = 1 + img.depth * 0.0004;
+            img.mesh.position.y =
+              -img.top +
+              lenis.animatedScroll * parallaxFactor +
               screen.height / 2 -
-              t.bounds.height / 2;
+              img.height / 2;
+
+            img.mesh.position.z = img.depth;
+
+            const depthScale = DIST / (DIST - img.depth);
+            img.mesh.scale.set(
+              img.width * depthScale,
+              img.height * depthScale,
+              1,
+            );
+          });
+
+          if (composer) {
+            composer.render();
+          } else {
+            renderer.render(scene, camera);
           }
-        });
-
-        // Update image positions (ScrollTrigger handles the animation)
-        images.forEach((img) => {
-          const dragOffset = img.isOilImage ? oilDragX : 0;
-          img.mesh.position.x =
-            img.left - screen.width / 2 + img.width / 2 - dragOffset;
-
-          // Depth-based parallax: images further from camera scroll slower
-          const parallaxFactor = 1 + img.depth * 0.0004;
-          img.mesh.position.y =
-            -img.top +
-            lenis.animatedScroll * parallaxFactor +
-            screen.height / 2 -
-            img.height / 2;
-
-          img.mesh.position.z = img.depth;
-
-          // Compensate perspective shrinking so deeper images stay visually large
-          const depthScale = DIST / (DIST - img.depth);
-          img.mesh.scale.set(
-            img.width * depthScale,
-            img.height * depthScale,
-            1,
-          );
-        });
-
-        composer.render();
+          needsRender = false;
+        }
         animationId = requestAnimationFrame(update);
       };
 
@@ -596,7 +613,7 @@ export default function TextDemo() {
         screen.height = window.innerHeight;
 
         renderer.setSize(screen.width, screen.height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 
         camera.fov =
           2 * Math.atan(screen.height / 2 / DIST) * (180 / Math.PI);
@@ -631,7 +648,8 @@ export default function TextDemo() {
           );
         });
 
-        composer.setSize(screen.width, screen.height);
+        if (composer) composer.setSize(screen.width, screen.height);
+        needsRender = true;
       };
 
       window.addEventListener('resize', resizeHandler);
