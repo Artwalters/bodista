@@ -196,7 +196,10 @@ export default function TextDemo() {
       await document.fonts.ready;
 
       const THREE = await import('three');
-      const {Text} = await import('troika-three-text');
+      const {Text, configureTextBuilder} = await import('troika-three-text');
+
+      // Disable Web Worker — Oxygen CSP blocks blob: worker URLs
+      configureTextBuilder({useWorker: false});
       const {getLenisInstance} = await import('~/lib/lenis');
       const gsap = (await import('gsap')).default;
       const {ScrollTrigger} = await import('gsap/ScrollTrigger');
