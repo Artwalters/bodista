@@ -196,6 +196,8 @@ export default function TextDemo() {
     const init = async () => {
       await document.fonts.ready;
 
+      const isMobile = window.innerWidth < 768;
+
       // Must configure before any Text is created
       const {configureTextBuilder} = await import('troika-three-text');
       configureTextBuilder({useWorker: false});
@@ -229,10 +231,6 @@ export default function TextDemo() {
       }
 
       lenis.on('scroll', () => { needsRender = true; });
-
-      /* ── Screen & camera ── */
-
-      const isMobile = window.innerWidth < 768;
       const screen = {
         width: window.innerWidth,
         height: window.innerHeight,
