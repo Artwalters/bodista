@@ -2,9 +2,8 @@ import {useEffect, useState, useCallback, useRef} from 'react';
 import type {Route} from './+types/text-demo';
 import styles from '~/styles/text-demo.module.css';
 
-// Test: Google Fonts serif (Playfair Display) to verify Troika works with external CDN
-const FONT_DEFAULT = 'https://fonts.gstatic.com/s/playfairdisplay/v40/nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_qiTbtY.ttf';
-const FONT_ITALIC = 'https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.ttf';
+const FONT_DEFAULT = 'https://bodista.b-cdn.net/Novela/Novela-Regular.otf';
+const FONT_ITALIC = 'https://bodista.b-cdn.net/Novela/Novela-RegularItalic.otf';
 
 /* ── Text Shaders ── */
 
@@ -196,11 +195,12 @@ export default function TextDemo() {
     const init = async () => {
       await document.fonts.ready;
 
-      const THREE = await import('three');
-      const {Text, configureTextBuilder} = await import('troika-three-text');
-
-      // Disable Web Worker — Oxygen CSP blocks blob: worker URLs
+      // Must configure before any Text is created
+      const {configureTextBuilder} = await import('troika-three-text');
       configureTextBuilder({useWorker: false});
+
+      const THREE = await import('three');
+      const {Text} = await import('troika-three-text');
       const {getLenisInstance} = await import('~/lib/lenis');
       const gsap = (await import('gsap')).default;
       const {ScrollTrigger} = await import('gsap/ScrollTrigger');
