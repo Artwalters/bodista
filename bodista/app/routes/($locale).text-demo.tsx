@@ -18,6 +18,7 @@ void main() {
 
 const textFragShader = /* glsl */ `
 uniform float uReveal;
+uniform float uOpacity;
 uniform vec3 uColor;
 varying vec2 vUv;
 
@@ -52,6 +53,7 @@ void main() {
   float expandedReveal = uReveal * 1.6 - 0.3;
   float mask = smoothstep(expandedReveal - 0.3, expandedReveal + 0.3, n);
   float alpha = 1.0 - mask;
+  alpha *= uOpacity;
   if (alpha < 0.01) discard;
   gl_FragColor = vec4(uColor, alpha);
 }
@@ -152,6 +154,7 @@ interface TextEntry {
   bounds: DOMRect;
   y: number;
   isVisible: boolean;
+  isOilText: boolean;
 }
 
 interface ImageEntry {
@@ -287,6 +290,7 @@ export default function TextDemo() {
           transparent: true,
           uniforms: {
             uReveal: new THREE.Uniform(0),
+            uOpacity: new THREE.Uniform(1),
             uColor: new THREE.Uniform(color),
           },
         });
@@ -317,7 +321,8 @@ export default function TextDemo() {
         element.style.color = 'transparent';
         restoreElements.push({el: element, prop: 'color', val: ''});
 
-        texts.push({mesh, element, material, bounds, y, isVisible: false});
+        const isOilText = !!element.closest('[data-oil-section]');
+        texts.push({mesh, element, material, bounds, y, isVisible: false, isOilText});
       });
 
       /* ── Noise reveal animations ── */
@@ -562,6 +567,8 @@ export default function TextDemo() {
           oilDragDirty = false;
         }
         if (needsRender) {
+          const oilTextFade = 1 - Math.min(1, Math.max(0, (oilDragX - 50) / 250));
+
           texts.forEach((t) => {
             if (t.isVisible) {
               t.mesh.position.x =
@@ -571,6 +578,10 @@ export default function TextDemo() {
                 lenis.animatedScroll +
                 screen.height / 2 -
                 t.bounds.height / 2;
+
+              if (t.isOilText) {
+                t.material.uniforms.uReveal.value = oilTextFade;
+              }
             }
           });
 
@@ -848,6 +859,7 @@ function OilSection() {
     <section
       ref={sectionRef}
       className={styles.oilSection}
+      data-oil-section
     >
       <div ref={textRef} className={styles.oilText}>
         <h2 data-animation="webgl-text" className={styles.oilHeading}>
