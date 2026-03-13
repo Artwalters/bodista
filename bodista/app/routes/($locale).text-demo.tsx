@@ -350,14 +350,13 @@ export default function TextDemo() {
         }
       });
 
-      /* ── WebGL images ── */
+      /* ── WebGL images (desktop only) ── */
 
-      const mediaElements = document.querySelectorAll<HTMLImageElement>(
-        '[data-webgl-media]',
-      );
+      const mediaElements = isMobile
+        ? []
+        : Array.from(document.querySelectorAll<HTMLImageElement>('[data-webgl-media]'));
       const images: ImageEntry[] = [];
-      const subdivs = isMobile ? 16 : 32;
-      const imageGeometry = new THREE.PlaneGeometry(1, 1, subdivs, subdivs);
+      const imageGeometry = new THREE.PlaneGeometry(1, 1, 32, 32);
       const textureLoader = new THREE.TextureLoader();
 
       // Wait for all images to load
