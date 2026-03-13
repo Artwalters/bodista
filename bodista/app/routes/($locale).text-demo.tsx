@@ -2,9 +2,8 @@ import {useEffect, useState, useCallback, useRef} from 'react';
 import type {Route} from './+types/text-demo';
 import styles from '~/styles/text-demo.module.css';
 
-// .bin extension prevents Oxygen CDN from re-encoding fonts to woff2
-const FONT_DEFAULT = '/fonts/Novela-Regular.bin';
-const FONT_ITALIC = '/fonts/Novela-RegularItalic.bin';
+import {FONT_DEFAULT} from '~/lib/font-novela-regular';
+import {FONT_ITALIC} from '~/lib/font-novela-regularitalic';
 
 /* ── Text Shaders ── */
 
