@@ -20,6 +20,7 @@ export default async function handleRequest(
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
     defaultSrc: ['blob:'],
+    connectSrc: ["'self'", 'blob:'],
     workerSrc: ["'self'", 'blob:'],
   });
 
