@@ -2,8 +2,8 @@ import {useEffect, useState, useCallback, useRef} from 'react';
 import type {Route} from './+types/text-demo';
 import styles from '~/styles/text-demo.module.css';
 
-const FONT_DEFAULT = '/fonts/Novela-Regular.ttf';
-const FONT_ITALIC = '/fonts/Novela-RegularItalic.ttf';
+const FONT_DEFAULT = '/fonts/Novela-Regular.woff';
+const FONT_ITALIC = '/fonts/Novela-RegularItalic.woff';
 
 /* ── Text Shaders ── */
 
