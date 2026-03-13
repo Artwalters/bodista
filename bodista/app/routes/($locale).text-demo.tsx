@@ -2,8 +2,17 @@ import {useEffect, useState, useCallback, useRef} from 'react';
 import type {Route} from './+types/text-demo';
 import styles from '~/styles/text-demo.module.css';
 
-const FONT_DEFAULT = '/fonts/Novela-Regular.ttf';
-const FONT_ITALIC = '/fonts/Novela-RegularItalic.ttf';
+const FONT_DEFAULT_URL = '/fonts/Novela-Regular.ttf';
+const FONT_ITALIC_URL = '/fonts/Novela-RegularItalic.ttf';
+
+// Fetch font and create blob URL to bypass Oxygen CDN woff2 re-encoding.
+// Browser fetch() auto-decompresses Content-Encoding, giving us raw bytes.
+async function loadFontAsBlob(url: string): Promise<string> {
+  const res = await fetch(url);
+  const buf = await res.arrayBuffer();
+  const blob = new Blob([buf], {type: 'font/ttf'});
+  return URL.createObjectURL(blob);
+}
 
 /* ── Text Shaders ── */
 
@@ -194,6 +203,12 @@ export default function TextDemo() {
 
     const init = async () => {
       await document.fonts.ready;
+
+      // Pre-fetch fonts as blob URLs to bypass CDN font re-encoding
+      const [FONT_DEFAULT, FONT_ITALIC] = await Promise.all([
+        loadFontAsBlob(FONT_DEFAULT_URL),
+        loadFontAsBlob(FONT_ITALIC_URL),
+      ]);
 
       const THREE = await import('three');
       const {Text, configureTextBuilder} = await import('troika-three-text');
