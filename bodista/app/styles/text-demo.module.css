@@ -153,21 +153,30 @@
    ========================================================================== */
 
 .oilSection {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   padding: 6rem 6vw;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
 }
 
-.oilContent {
-  display: flex;
-  align-items: center;
-  gap: 6vw;
-  width: 100%;
+.oilSection:active {
+  cursor: grabbing;
 }
 
 .oilText {
-  flex: 0 0 28%;
+  position: absolute;
+  left: 6vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28%;
+  z-index: 2;
+  transition: opacity 0.1s ease-out;
+  pointer-events: none;
 }
 
 .oilHeading {
@@ -189,19 +198,13 @@
 }
 
 .oilImages {
-  flex: 1;
   display: flex;
   gap: 5vw;
-  overflow-x: auto;
-  cursor: grab;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  user-select: none;
   align-items: flex-start;
-}
-
-.oilImages::-webkit-scrollbar {
-  display: none;
+  margin-left: 36%;
+  z-index: 3;
+  position: relative;
+  will-change: transform;
 }
 
 .oilImageCol {
@@ -244,13 +247,17 @@
 }
 
 @media (max-width: 767px) {
-  .oilContent {
-    flex-direction: column;
+  .oilText {
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none;
+    width: 100%;
+    margin-bottom: 2rem;
   }
 
-  .oilText {
-    flex: none;
-    width: 100%;
+  .oilImages {
+    margin-left: 0;
   }
 
   .oilImgSm {
@@ -306,3 +313,4 @@
 .toggleDotOff {
   background: #f87171;
 }
+

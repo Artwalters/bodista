@@ -171,6 +171,7 @@ import type * as THREE from 'three';
 
 // Shared drag state between OilSection and WebGL render loop
 let oilDragX = 0;
+let oilDragDirty = false;
 
 export default function TextDemo() {
   const [webglEnabled, setWebglEnabled] = useState(true);
@@ -556,6 +557,10 @@ export default function TextDemo() {
       /* ── Render loop ── */
 
       const update = () => {
+        if (oilDragDirty) {
+          needsRender = true;
+          oilDragDirty = false;
+        }
         if (needsRender) {
           texts.forEach((t) => {
             if (t.isVisible) {
@@ -736,6 +741,7 @@ export default function TextDemo() {
 function OilSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
+  const imagesRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({
     active: false,
     startX: 0,
@@ -748,11 +754,17 @@ function OilSection() {
   const gsapRef = useRef<any>(null);
   const tweenTarget = useRef({x: 0});
 
-  const updateFade = useCallback(() => {
+  const applyDrag = useCallback(() => {
+    const images = imagesRef.current;
     const text = textRef.current;
-    oilDragX = scrollXRef.current;
+    const x = scrollXRef.current;
+    oilDragX = x;
+    oilDragDirty = true;
+    if (images) {
+      images.style.transform = `translateX(${-x}px)`;
+    }
     if (text) {
-      const progress = Math.min(1, Math.max(0, (oilDragX - 50) / 250));
+      const progress = Math.min(1, Math.max(0, (x - 50) / 250));
       text.style.opacity = String(1 - progress);
     }
   }, []);
@@ -763,64 +775,79 @@ function OilSection() {
     });
   }, []);
 
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
+  useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
-    if (gsapRef.current) gsapRef.current.killTweensOf(tweenTarget.current);
-    dragRef.current.active = true;
-    dragRef.current.startX = e.clientX;
-    dragRef.current.startScroll = scrollXRef.current;
-    dragRef.current.lastX = e.clientX;
-    dragRef.current.lastTime = Date.now();
-    dragRef.current.velocity = 0;
-    section.setPointerCapture(e.pointerId);
-  }, []);
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragRef.current.active) return;
-    const now = Date.now();
-    const dt = now - dragRef.current.lastTime;
-    if (dt > 0) {
-      dragRef.current.velocity = (e.clientX - dragRef.current.lastX) / dt * 1000;
-    }
-    dragRef.current.lastX = e.clientX;
-    dragRef.current.lastTime = now;
+    const onDown = (e: PointerEvent) => {
+      if (gsapRef.current) gsapRef.current.killTweensOf(tweenTarget.current);
+      dragRef.current.active = true;
+      dragRef.current.startX = e.clientX;
+      dragRef.current.startScroll = scrollXRef.current;
+      dragRef.current.lastX = e.clientX;
+      dragRef.current.lastTime = Date.now();
+      dragRef.current.velocity = 0;
+      section.setPointerCapture(e.pointerId);
+    };
 
-    const dx = e.clientX - dragRef.current.startX;
-    scrollXRef.current = Math.max(0, dragRef.current.startScroll - dx);
-    updateFade();
-  }, [updateFade]);
+    const onMove = (e: PointerEvent) => {
+      if (!dragRef.current.active) return;
+      e.preventDefault();
+      const now = Date.now();
+      const dt = now - dragRef.current.lastTime;
+      if (dt > 4 && dt < 200) {
+        const instantV = (e.clientX - dragRef.current.lastX) / dt * 1000;
+        dragRef.current.velocity = dragRef.current.velocity * 0.7 + instantV * 0.3;
+      }
+      dragRef.current.lastX = e.clientX;
+      dragRef.current.lastTime = now;
 
-  const onPointerUp = useCallback(() => {
-    if (!dragRef.current.active) return;
-    dragRef.current.active = false;
+      const dx = e.clientX - dragRef.current.startX;
+      scrollXRef.current = Math.max(0, dragRef.current.startScroll - dx);
+      applyDrag();
+    };
 
-    const gsap = gsapRef.current;
-    if (!gsap) return;
+    const onUp = () => {
+      if (!dragRef.current.active) return;
+      dragRef.current.active = false;
 
-    const v = dragRef.current.velocity;
-    const target = Math.max(0, scrollXRef.current - v * 0.4);
-    tweenTarget.current.x = scrollXRef.current;
+      const gsap = gsapRef.current;
+      if (!gsap) return;
 
-    gsap.to(tweenTarget.current, {
-      x: target,
-      duration: Math.max(0.4, Math.min(1.2, Math.abs(v) / 1500)),
-      ease: 'power3.out',
-      onUpdate: () => {
-        scrollXRef.current = tweenTarget.current.x;
-        updateFade();
-      },
-    });
-  }, [updateFade]);
+      const v = Math.max(-2000, Math.min(2000, dragRef.current.velocity));
+      const target = Math.max(0, scrollXRef.current - v * 0.3);
+      tweenTarget.current.x = scrollXRef.current;
+
+      gsap.to(tweenTarget.current, {
+        x: target,
+        duration: Math.max(0.4, Math.min(1.2, Math.abs(v) / 1500)),
+        ease: 'power3.out',
+        onUpdate: () => {
+          scrollXRef.current = tweenTarget.current.x;
+          applyDrag();
+        },
+      });
+    };
+
+    section.addEventListener('pointerdown', onDown);
+    section.addEventListener('pointermove', onMove);
+    section.addEventListener('pointerup', onUp);
+    section.addEventListener('pointercancel', onUp);
+    section.addEventListener('lostpointercapture', onUp);
+
+    return () => {
+      section.removeEventListener('pointerdown', onDown);
+      section.removeEventListener('pointermove', onMove);
+      section.removeEventListener('pointerup', onUp);
+      section.removeEventListener('pointercancel', onUp);
+      section.removeEventListener('lostpointercapture', onUp);
+    };
+  }, [applyDrag]);
 
   return (
     <section
       ref={sectionRef}
       className={styles.oilSection}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerLeave={onPointerUp}
     >
       <div ref={textRef} className={styles.oilText}>
         <h2 data-animation="webgl-text" className={styles.oilHeading}>
@@ -833,66 +860,30 @@ function OilSection() {
           complexion.
         </p>
       </div>
-      <div className={styles.oilImages}>
+      <div ref={imagesRef} className={styles.oilImages}>
         <div className={styles.oilImageCol}>
-          <img
-            data-webgl-media
-            data-webgl-effect="none"
-            data-webgl-depth="15"
-            data-oil-image
-            src="/images/1.jpg"
-            alt=""
-            className={`${styles.oilImg} ${styles.oilImgLg}`}
-          />
-          <img
-            data-webgl-media
-            data-webgl-effect="none"
-            data-webgl-depth="-10"
-            data-oil-image
-            src="/images/2.jpg"
-            alt=""
-            className={`${styles.oilImg} ${styles.oilImgSm}`}
-          />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="15" data-oil-image src="/images/1.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-10" data-oil-image src="/images/2.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgSm}`} />
         </div>
         <div className={`${styles.oilImageCol} ${styles.oilImageColOffset}`}>
-          <img
-            data-webgl-media
-            data-webgl-effect="none"
-            data-webgl-depth="25"
-            data-oil-image
-            src="/images/3.jpg"
-            alt=""
-            className={`${styles.oilImg} ${styles.oilImgWide}`}
-          />
-          <img
-            data-webgl-media
-            data-webgl-effect="none"
-            data-webgl-depth="-5"
-            data-oil-image
-            src="/images/4.jpg"
-            alt=""
-            className={`${styles.oilImg} ${styles.oilImgMd}`}
-          />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="25" data-oil-image src="/images/3.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-5" data-oil-image src="/images/4.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
         </div>
         <div className={styles.oilImageCol}>
-          <img
-            data-webgl-media
-            data-webgl-effect="none"
-            data-webgl-depth="10"
-            data-oil-image
-            src="/images/1.jpg"
-            alt=""
-            className={`${styles.oilImg} ${styles.oilImgMd}`}
-          />
-          <img
-            data-webgl-media
-            data-webgl-effect="none"
-            data-webgl-depth="30"
-            data-oil-image
-            src="/images/3.jpg"
-            alt=""
-            className={`${styles.oilImg} ${styles.oilImgWide}`}
-          />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="10" data-oil-image src="/images/1.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="30" data-oil-image src="/images/3.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
+        </div>
+        <div className={`${styles.oilImageCol} ${styles.oilImageColOffset}`}>
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="20" data-oil-image src="/images/2.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-15" data-oil-image src="/images/4.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgSm}`} />
+        </div>
+        <div className={styles.oilImageCol}>
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="5" data-oil-image src="/images/3.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-20" data-oil-image src="/images/1.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
+        </div>
+        <div className={`${styles.oilImageCol} ${styles.oilImageColOffset}`}>
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="35" data-oil-image src="/images/4.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-8" data-oil-image src="/images/2.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
         </div>
       </div>
     </section>
