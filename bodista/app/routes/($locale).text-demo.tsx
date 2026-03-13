@@ -3,8 +3,8 @@ import type {Route} from './+types/text-demo';
 import styles from '~/styles/text-demo.module.css';
 
 // Test: Google Fonts serif (Playfair Display) to verify Troika works with external CDN
-const FONT_DEFAULT = 'https://fonts.gstatic.com/s/playfairdisplay/v37/nuFiD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_qiTbtbK-F2rA0s.ttf';
-const FONT_ITALIC = 'https://fonts.gstatic.com/s/playfairdisplay/v37/nuFkD-vYSZviVYUb_rj3ij__anPXDTngOWwe4zSRKEh_HMFhToo8RFas8nCl.ttf';
+const FONT_DEFAULT = 'https://fonts.gstatic.com/s/playfairdisplay/v40/nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_qiTbtY.ttf';
+const FONT_ITALIC = 'https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.ttf';
 
 /* ── Text Shaders ── */
 
