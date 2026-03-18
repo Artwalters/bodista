@@ -137,7 +137,6 @@
 .figure {
   margin: 0;
   position: relative;
-  overflow: hidden;
 }
 
 .gridImage {
@@ -199,7 +198,7 @@
 
 .oilImages {
   display: flex;
-  gap: 5vw;
+  gap: 7vw;
   align-items: flex-start;
   margin-left: 36%;
   z-index: 3;
@@ -210,7 +209,7 @@
 .oilImageCol {
   display: flex;
   flex-direction: column;
-  gap: 6vh;
+  gap: 10vh;
   flex-shrink: 0;
 }
 
