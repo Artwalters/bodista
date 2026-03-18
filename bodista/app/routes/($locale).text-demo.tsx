@@ -701,8 +701,8 @@ export default function TextDemo() {
           <img
             data-webgl-media
             data-webgl-effect="none"
-            src="/images/1.jpg"
-            alt="Foto 1 — geen effect"
+            src="/images/face-mist-sunlight.webp"
+            alt="Bodista Face Mist in zonlicht"
             className={styles.gridImage}
           />
         </figure>
@@ -710,8 +710,8 @@ export default function TextDemo() {
           <img
             data-webgl-media
             data-webgl-effect="distort"
-            src="/images/2.jpg"
-            alt="Foto 2 — distort + zoom"
+            src="/images/body-oil-painting-backdrop.webp"
+            alt="Bodista Body Oil met schilderij"
             className={styles.gridImage}
           />
         </figure>
@@ -728,8 +728,8 @@ export default function TextDemo() {
           <img
             data-webgl-media
             data-webgl-effect="parallax"
-            src="/images/3.jpg"
-            alt="Foto 3 — parallax"
+            src="/images/body-oil-dramatic.webp"
+            alt="Bodista Body Oil dramatisch licht"
             className={styles.gridImage}
           />
         </figure>
@@ -737,8 +737,8 @@ export default function TextDemo() {
           <img
             data-webgl-media
             data-webgl-effect="bend"
-            src="/images/4.jpg"
-            alt="Foto 4 — bend/peel"
+            src="/images/face-mist-duo-marble.webp"
+            alt="Bodista Face Mist duo op marmer"
             className={styles.gridImage}
           />
         </figure>
@@ -874,28 +874,28 @@ function OilSection() {
       </div>
       <div ref={imagesRef} className={styles.oilImages}>
         <div className={styles.oilImageCol}>
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="15" data-oil-image src="/images/1.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-10" data-oil-image src="/images/2.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgSm}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="15" data-oil-image src="/images/body-oil-dark-mood.webp" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-10" data-oil-image src="/images/face-mist-detail-gold.webp" alt="" className={`${styles.oilImg} ${styles.oilImgSm}`} />
         </div>
         <div className={`${styles.oilImageCol} ${styles.oilImageColOffset}`}>
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="25" data-oil-image src="/images/3.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-5" data-oil-image src="/images/4.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="25" data-oil-image src="/images/body-oil-face-mist-duo.webp" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-5" data-oil-image src="/images/face-mist-sepia.webp" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
         </div>
         <div className={styles.oilImageCol}>
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="10" data-oil-image src="/images/1.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="30" data-oil-image src="/images/3.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="10" data-oil-image src="/images/body-oil-tilted-closeup.webp" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="30" data-oil-image src="/images/body-oil-painting-backdrop.webp" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
         </div>
         <div className={`${styles.oilImageCol} ${styles.oilImageColOffset}`}>
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="20" data-oil-image src="/images/2.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-15" data-oil-image src="/images/4.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgSm}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="20" data-oil-image src="/images/face-mist-glowing.webp" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-15" data-oil-image src="/images/body-oil-warm-closeup.webp" alt="" className={`${styles.oilImg} ${styles.oilImgSm}`} />
         </div>
         <div className={styles.oilImageCol}>
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="5" data-oil-image src="/images/3.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-20" data-oil-image src="/images/1.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="5" data-oil-image src="/images/body-oil-dramatic.webp" alt="" className={`${styles.oilImg} ${styles.oilImgWide}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-20" data-oil-image src="/images/face-mist-sunlight.webp" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
         </div>
         <div className={`${styles.oilImageCol} ${styles.oilImageColOffset}`}>
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="35" data-oil-image src="/images/4.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
-          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-8" data-oil-image src="/images/2.jpg" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="35" data-oil-image src="/images/face-mist-duo-marble.webp" alt="" className={`${styles.oilImg} ${styles.oilImgMd}`} />
+          <img data-webgl-media data-webgl-effect="none" data-webgl-depth="-8" data-oil-image src="/images/body-oil-dramatic-alt.webp" alt="" className={`${styles.oilImg} ${styles.oilImgLg}`} />
         </div>
       </div>
     </section>

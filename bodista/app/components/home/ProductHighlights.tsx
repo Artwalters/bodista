@@ -32,9 +32,9 @@ export function ProductHighlights({
               )}
             </div>
             <h3 className="highlights-product-name">{product.title}</h3>
-            <p className="highlights-price">
+            <span className="highlights-price">
               <Money data={product.priceRange.minVariantPrice} />
-            </p>
+            </span>
           </Link>
         ))}
       </div>
