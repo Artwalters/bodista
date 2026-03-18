@@ -81,8 +81,8 @@ void main() {
     float startAt = uv.y - 0.5;
     float finishAt = uv.y;
     float bend = smoothstep(startAt, finishAt, 1.0 - u_progress);
-    pos.x *= 1.0 + (bend * 0.08) * abs(ssCoords.x);
-    pos.z += bend * 14.0;
+    pos.x *= 1.0 + (bend * 0.04) * abs(ssCoords.x);
+    pos.z += bend * 7.0;
   }
 
   vUv = uv;
@@ -605,20 +605,19 @@ export default function TextDemo() {
               img.mesh.position.y += img.height * shrink * 8.0;
             }
 
-            // Subtle scroll-based zoom out: only on grid images, not oil section
-            let scrollScale = 1;
+            // Scroll-based inner zoom out: shrinks image inside the frame, not the mesh
             if (!img.isOilImage) {
               const screenY = img.mesh.position.y;
               const t = Math.max(0, Math.min(1,
                 (screenY + screen.height * 0.5) / (screen.height * 1.5)
               ));
-              scrollScale = 1 - t * 0.08;
+              img.material.uniforms.u_innerScale.value = 1.0 + (1 - t) * 0.12;
             }
 
             const depthScale = DIST / (DIST - img.depth);
             img.mesh.scale.set(
-              img.width * depthScale * scrollScale,
-              img.height * depthScale * scrollScale,
+              img.width * depthScale,
+              img.height * depthScale,
               1,
             );
           });
@@ -740,15 +739,26 @@ export default function TextDemo() {
             help forward-thinking clients achieve impact and growth.
           </h2>
         </section>
-        <figure className={styles.figure}>
-          <img
-            data-webgl-media
-            data-webgl-effect="bend"
-            src="/images/body-oil-dramatic.webp"
-            alt="Bodista Body Oil dramatisch licht"
-            className={styles.gridImage}
-          />
-        </figure>
+        <div className={styles.figurePair}>
+          <figure className={styles.figureHalf}>
+            <img
+              data-webgl-media
+              data-webgl-effect="bend"
+              src="/images/body-oil-dramatic.webp"
+              alt="Bodista Body Oil dramatisch licht"
+              className={styles.gridImage}
+            />
+          </figure>
+          <figure className={styles.figureHalf}>
+            <img
+              data-webgl-media
+              data-webgl-effect="bend"
+              src="/images/body-oil-dark-mood.webp"
+              alt="Bodista Body Oil donkere sfeer"
+              className={styles.gridImage}
+            />
+          </figure>
+        </div>
         <figure className={styles.figure}>
           <img
             data-webgl-media
