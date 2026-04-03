@@ -121,6 +121,67 @@ void main() {
 }
 `
 
+/* ── Emboss V2 Shader (distance field based) ── */
+
+const embossVertShader = /* glsl */ `
+varying vec2 vUv;
+
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`
+
+const embossFragShader = /* glsl */ `
+precision highp float;
+
+uniform sampler2D uNormalMap;
+uniform sampler2D uHeightMap;
+uniform vec2 uLightDir;
+uniform float uLightAltitude;
+uniform float uDepth;
+uniform float uHighlightStrength;
+uniform float uShadowStrength;
+uniform float uSpecularPower;
+
+varying vec2 vUv;
+
+void main() {
+  vec3 normal = texture2D(uNormalMap, vUv).rgb * 2.0 - 1.0;
+  float height = texture2D(uHeightMap, vUv).r;
+
+  float dev = length(normal.xy);
+  float edgeMask = smoothstep(0.01, 0.15, dev) * (1.0 - smoothstep(0.6, 0.9, dev));
+  if (edgeMask < 0.001) discard;
+
+  // Scale normals
+  normal.xy *= uDepth;
+  normal = normalize(normal);
+
+  // Light direction from angle + altitude
+  vec3 lightDir = normalize(vec3(uLightDir, uLightAltitude));
+
+  // Diffuse (Lambert)
+  float NdotL = dot(normal, lightDir);
+
+  // Specular (Blinn-Phong) — subtle sheen
+  vec3 viewDir = vec3(0.0, 0.0, 1.0);
+  vec3 halfDir = normalize(lightDir + viewDir);
+  float spec = pow(max(dot(normal, halfDir), 0.0), uSpecularPower) * 0.2;
+
+  // Separate highlight and shadow layers — smooth blend
+  float shadow = clamp(-NdotL, 0.0, 1.0) * uShadowStrength;
+  float highlight = clamp(NdotL, 0.0, 1.0) * uHighlightStrength + spec;
+
+  // Smooth blend between shadow and highlight instead of hard cut
+  float blend = smoothstep(-0.15, 0.15, NdotL);
+  vec3 color = vec3(blend);
+  float finalAlpha = max(shadow, highlight) * edgeMask;
+
+  gl_FragColor = vec4(color, finalAlpha);
+}
+`
+
 /* ── Image Shaders ── */
 
 const imgVertShader = /* glsl */ `
@@ -596,6 +657,72 @@ export default function TextDemo() {
         })
       }
 
+      /* ── Emboss V2 setup (distance field based) ── */
+
+      const {generateTextEmboss} = await import('~/lib/normalMapGenerator')
+
+      interface EmbossEntry {
+        mesh: THREE.Mesh
+        element: HTMLElement
+        material: THREE.ShaderMaterial
+        width: number
+        height: number
+        top: number
+        left: number
+      }
+
+      const embossElements = document.querySelectorAll<HTMLElement>('[data-webgl-emboss]')
+      const embosses: EmbossEntry[] = []
+      const embossGeometry = new THREE.PlaneGeometry(1, 1)
+
+      for (const el of embossElements) {
+        const textContent = el.getAttribute('data-webgl-emboss')
+        if (!textContent) continue
+
+        const bounds = el.getBoundingClientRect()
+        const dpr = Math.min(window.devicePixelRatio, 2)
+
+        const {normalMap, heightMap} = generateTextEmboss(textContent, {
+          fontSize: parseInt(el.dataset.embossFontSize || '120', 10),
+          fontFamily: el.dataset.embossFont || 'serif',
+          width: Math.round(bounds.width * dpr),
+          height: Math.round(bounds.height * dpr),
+          bevelWidth: parseFloat(el.dataset.embossBevel || '12'),
+          depth: parseFloat(el.dataset.embossDepth || '1.0'),
+          strength: parseFloat(el.dataset.embossStrength || '2.0'),
+        })
+
+        const embossMaterial = new THREE.ShaderMaterial({
+          vertexShader: embossVertShader,
+          fragmentShader: embossFragShader,
+          transparent: true,
+          uniforms: {
+            uNormalMap: {value: normalMap},
+            uHeightMap: {value: heightMap},
+            uLightDir: {value: new THREE.Vector2(-0.4, 0.4)},
+            uLightAltitude: {value: parseFloat(el.dataset.embossAltitude || '0.5')},
+            uDepth: {value: parseFloat(el.dataset.embossNormalDepth || '2.5')},
+            uHighlightStrength: {value: parseFloat(el.dataset.embossHighlight || '0.2')},
+            uShadowStrength: {value: parseFloat(el.dataset.embossShadow || '0.4')},
+            uSpecularPower: {value: parseFloat(el.dataset.embossSpecular || '40.0')},
+          },
+        })
+
+        const embossMesh = new THREE.Mesh(embossGeometry, embossMaterial)
+        embossMesh.scale.set(bounds.width, bounds.height, 1)
+        scene.add(embossMesh)
+
+        embosses.push({
+          mesh: embossMesh,
+          element: el,
+          material: embossMaterial,
+          width: bounds.width,
+          height: bounds.height,
+          top: bounds.top + lenis.actualScroll,
+          left: bounds.left,
+        })
+      }
+
       /* ── ScrollTrigger animations per image (based on effect type) ── */
 
       images.forEach((img) => {
@@ -765,6 +892,21 @@ export default function TextDemo() {
             )
           })
 
+          embosses.forEach((emb) => {
+            emb.mesh.position.x =
+              emb.left - screen.width / 2 + emb.width / 2
+            emb.mesh.position.y =
+              -emb.top +
+              lenis.animatedScroll +
+              screen.height / 2 -
+              emb.height / 2
+
+            // Subtle mouse influence on light direction
+            const baseX = -0.4 + smoothMouse.x * 0.35
+            const baseY = 0.4 + smoothMouse.y * 0.35
+            emb.material.uniforms.uLightDir.value.set(baseX, baseY)
+          })
+
           images.forEach((img) => {
             const dragOffset = img.isOilImage ? oilDragX : 0;
             img.mesh.position.x =
@@ -864,6 +1006,16 @@ export default function TextDemo() {
           eng.height = bounds.height;
           eng.top = bounds.top + lenis.actualScroll;
           eng.left = bounds.left;
+        });
+
+        // Resize embosses
+        embosses.forEach((emb) => {
+          const bounds = emb.element.getBoundingClientRect();
+          emb.mesh.scale.set(bounds.width, bounds.height, 1);
+          emb.width = bounds.width;
+          emb.height = bounds.height;
+          emb.top = bounds.top + lenis.actualScroll;
+          emb.left = bounds.left;
         });
 
         if (composer) composer.setSize(screen.width, screen.height);
@@ -970,6 +1122,22 @@ export default function TextDemo() {
           data-engraving-depth="2.5"
           data-engraving-intensity="0.8"
           data-engraving-font-size="450"
+        />
+      </section>
+
+      <section className={styles.engravingSection}>
+        <div
+          className={styles.engravingPlate}
+          data-webgl-emboss="BODISTA"
+          data-emboss-font-size="450"
+          data-emboss-bevel="8"
+          data-emboss-depth="0.6"
+          data-emboss-strength="3.0"
+          data-emboss-normal-depth="2.0"
+          data-emboss-altitude="0.6"
+          data-emboss-highlight="0.15"
+          data-emboss-shadow="0.4"
+          data-emboss-specular="50"
         />
       </section>
 
