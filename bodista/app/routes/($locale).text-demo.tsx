@@ -39,25 +39,87 @@ float noise(vec2 p) {
 
 float fbm(vec2 p) {
   float value = 0.0;
-  float amp = 0.5;
-  for (int i = 0; i < 5; i++) {
+  float amp = 0.6;
+  for (int i = 0; i < 7; i++) {
     value += amp * noise(p);
-    p *= 2.0;
-    amp *= 0.5;
+    p *= 2.2;
+    amp *= 0.55;
   }
   return value;
 }
 
 void main() {
-  float n = fbm(vUv * 6.0);
+  float n = fbm(vUv * 10.0);
   float expandedReveal = uReveal * 1.6 - 0.3;
-  float mask = smoothstep(expandedReveal - 0.3, expandedReveal + 0.3, n);
+  float mask = smoothstep(expandedReveal - 0.15, expandedReveal + 0.15, n);
   float alpha = 1.0 - mask;
   alpha *= uOpacity;
   if (alpha < 0.01) discard;
   gl_FragColor = vec4(uColor, alpha);
 }
 `;
+
+/* ── Engraving Shaders ── */
+
+const engravingVertShader = /* glsl */ `
+varying vec2 vUv;
+
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`
+
+const engravingFragShader = /* glsl */ `
+precision highp float;
+
+uniform sampler2D uNormalMap;
+uniform vec2 uLightPos;
+uniform float uEngravingDepth;
+uniform float uIntensity;
+
+varying vec2 vUv;
+
+void main() {
+  vec3 normal = texture2D(uNormalMap, vUv).rgb * 2.0 - 1.0;
+
+  // Soft alpha ramp — wide transition for paper-like softness
+  float deviation = length(normal.xy);
+  float alpha = smoothstep(0.005, 0.25, deviation);
+
+  if (alpha < 0.001) discard;
+
+  // Scale normals
+  normal.xy *= uEngravingDepth;
+  normal = normalize(normal);
+
+  // Base light from top-left + subtle mouse influence
+  vec2 baseLight = vec2(-0.4, 0.4);
+  vec2 mouseInfluence = uLightPos * 0.35;
+  vec2 lightXY = baseLight + mouseInfluence;
+  vec3 lightDir = normalize(vec3(lightXY, 1.2));
+  float NdotL = dot(normal, lightDir);
+
+  // Positional gradient
+  vec2 centeredUv = vUv - 0.5;
+  vec2 lp = length(lightXY) > 0.001 ? normalize(lightXY) : normalize(baseLight);
+  float positional = dot(centeredUv, lp) * 0.4;
+
+  float shifted = NdotL + positional;
+
+  float shadow = clamp(-shifted, 0.0, 1.0) * uIntensity * 0.5;
+  float highlight = clamp(shifted, 0.0, 1.0) * uIntensity * 0.15;
+
+  // Subtle base
+  float base = alpha * 0.06;
+
+  vec3 color = shifted > 0.0 ? vec3(1.0) : vec3(0.0);
+  float lightAlpha = max(shadow, highlight) * alpha;
+  float finalAlpha = max(lightAlpha, base);
+
+  gl_FragColor = vec4(color, finalAlpha);
+}
+`
 
 /* ── Image Shaders ── */
 
@@ -193,6 +255,7 @@ export default function TextDemo() {
     let canvas: HTMLCanvasElement | undefined;
     let cancelled = false;
     let needsRender = true;
+    let onMouseMove: ((e: MouseEvent) => void) | undefined;
 
     // Restore visibility on text/image elements when WebGL takes over
     const restoreElements: Array<{el: HTMLElement; prop: string; val: string}> = [];
@@ -436,6 +499,103 @@ export default function TextDemo() {
         });
       }
 
+      /* ── Engraving setup ── */
+
+      const {generateNormalMap, generateTextNormalMap} = await import('~/lib/normalMapGenerator')
+
+      interface EngravingEntry {
+        mesh: THREE.Mesh
+        element: HTMLElement
+        material: THREE.ShaderMaterial
+        width: number
+        height: number
+        top: number
+        left: number
+      }
+
+      const engravingElements = document.querySelectorAll<HTMLElement>(
+        '[data-webgl-engraving], [data-webgl-engraving-text]'
+      )
+      const engravings: EngravingEntry[] = []
+      const engravingGeometry = new THREE.PlaneGeometry(1, 1)
+
+      // Mouse position for light direction
+      const mousePos = {x: 0, y: 0}
+      const smoothMouse = {x: 0, y: 0}
+
+      onMouseMove = (e: MouseEvent) => {
+        mousePos.x = (e.clientX / screen.width) * 2 - 1
+        mousePos.y = -((e.clientY / screen.height) * 2 - 1)
+        needsRender = true
+      }
+      window.addEventListener('mousemove', onMouseMove)
+
+      for (const el of engravingElements) {
+        const bounds = el.getBoundingClientRect()
+        let normalMapTexture: THREE.CanvasTexture
+
+        const textContent = el.getAttribute('data-webgl-engraving-text')
+        const imgSrc = el.getAttribute('data-webgl-engraving')
+
+        if (textContent) {
+          // Text-based normal map generation
+          const dpr = Math.min(window.devicePixelRatio, 2)
+          normalMapTexture = generateTextNormalMap(textContent, {
+            fontSize: parseInt(el.dataset.engravingFontSize || '120', 10),
+            fontFamily: el.dataset.engravingFont || 'serif',
+            width: Math.round(bounds.width * dpr),
+            height: Math.round(bounds.height * dpr),
+            strength: parseFloat(el.dataset.engravingStrength || '3'),
+            blur: parseInt(el.dataset.engravingBlur || '3', 10),
+          })
+        } else if (imgSrc) {
+          // Image-based normal map generation
+          const sourceImg = new Image()
+          sourceImg.crossOrigin = 'anonymous'
+          await new Promise<void>((resolve) => {
+            sourceImg.onload = () => resolve()
+            sourceImg.onerror = () => resolve()
+            sourceImg.src = imgSrc
+          })
+
+          if (cancelled) return
+
+          normalMapTexture = generateNormalMap(sourceImg, {
+            strength: parseFloat(el.dataset.engravingStrength || '3'),
+            blur: parseInt(el.dataset.engravingBlur || '2', 10),
+            invert: el.dataset.engravingInvert !== 'false',
+          })
+        } else {
+          continue
+        }
+
+        const engravingMaterial = new THREE.ShaderMaterial({
+          vertexShader: engravingVertShader,
+          fragmentShader: engravingFragShader,
+          transparent: true,
+          uniforms: {
+            uNormalMap: {value: normalMapTexture},
+            uLightPos: {value: new THREE.Vector2(0.5, 0.5)},
+            uEngravingDepth: {value: parseFloat(el.dataset.engravingDepth || '2.5')},
+            uIntensity: {value: parseFloat(el.dataset.engravingIntensity || '0.8')},
+          },
+        })
+
+        const engravingMesh = new THREE.Mesh(engravingGeometry, engravingMaterial)
+        engravingMesh.scale.set(bounds.width, bounds.height, 1)
+        scene.add(engravingMesh)
+
+        engravings.push({
+          mesh: engravingMesh,
+          element: el,
+          material: engravingMaterial,
+          width: bounds.width,
+          height: bounds.height,
+          top: bounds.top + lenis.actualScroll,
+          left: bounds.left,
+        })
+      }
+
       /* ── ScrollTrigger animations per image (based on effect type) ── */
 
       images.forEach((img) => {
@@ -585,6 +745,26 @@ export default function TextDemo() {
             }
           });
 
+          // Smooth mouse lerp for engraving light + shadow
+          smoothMouse.x += (mousePos.x - smoothMouse.x) * 0.015
+          smoothMouse.y += (mousePos.y - smoothMouse.y) * 0.015
+
+
+          engravings.forEach((eng) => {
+            eng.mesh.position.x =
+              eng.left - screen.width / 2 + eng.width / 2
+            eng.mesh.position.y =
+              -eng.top +
+              lenis.animatedScroll +
+              screen.height / 2 -
+              eng.height / 2
+
+            eng.material.uniforms.uLightPos.value.set(
+              smoothMouse.x,
+              smoothMouse.y
+            )
+          })
+
           images.forEach((img) => {
             const dragOffset = img.isOilImage ? oilDragX : 0;
             img.mesh.position.x =
@@ -676,6 +856,16 @@ export default function TextDemo() {
           );
         });
 
+        // Resize engravings
+        engravings.forEach((eng) => {
+          const bounds = eng.element.getBoundingClientRect();
+          eng.mesh.scale.set(bounds.width, bounds.height, 1);
+          eng.width = bounds.width;
+          eng.height = bounds.height;
+          eng.top = bounds.top + lenis.actualScroll;
+          eng.left = bounds.left;
+        });
+
         if (composer) composer.setSize(screen.width, screen.height);
         needsRender = true;
       };
@@ -689,6 +879,7 @@ export default function TextDemo() {
       cancelled = true;
       if (animationId) cancelAnimationFrame(animationId);
       if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+      if (onMouseMove) window.removeEventListener('mousemove', onMouseMove);
       if (canvas) canvas.remove();
       document.body.classList.remove('webgl-active');
       restoreElements.forEach(({el, prop, val}) => {
@@ -768,6 +959,18 @@ export default function TextDemo() {
             className={styles.gridImage}
           />
         </figure>
+      </section>
+
+      <section className={styles.engravingSection}>
+        <div
+          className={styles.engravingPlate}
+          data-webgl-engraving-text="BODISTA"
+          data-engraving-strength="3"
+          data-engraving-blur="5"
+          data-engraving-depth="2.5"
+          data-engraving-intensity="0.8"
+          data-engraving-font-size="450"
+        />
       </section>
 
       <OilSection />
