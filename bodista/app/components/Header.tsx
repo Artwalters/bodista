@@ -27,8 +27,9 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header
+  const {isMenuOpen} = useMenu()
   return (
-    <div className="header-wrapper">
+    <div className="header-wrapper" data-menu-open={isMenuOpen || undefined}>
       <header className="header">
         <div className="header-left">
           <MenuToggle />

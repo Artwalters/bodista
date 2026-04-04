@@ -3,6 +3,10 @@
 import {Await, Link} from 'react-router'
 import {Suspense, useId, useEffect, useRef, useState, createContext, useContext, useCallback} from 'react'
 import {gsap} from 'gsap'
+import {CustomEase} from 'gsap/CustomEase'
+
+gsap.registerPlugin(CustomEase)
+CustomEase.create('osmo', 'M0,0 C0.625,0.05 0,1 1,1')
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -94,14 +98,14 @@ export function PageLayout({
       gsap.to(outer, {
         y: menuHeight,
         duration: 0.6,
-        ease: 'power3.inOut',
+        ease: 'osmo',
       })
     } else {
       // Slide back up
       gsap.to(outer, {
         y: 0,
         duration: 0.6,
-        ease: 'power3.inOut',
+        ease: 'osmo',
         onComplete: () => {
           // Clear all inline styles
           gsap.set(outer, {clearProps: 'all'})
