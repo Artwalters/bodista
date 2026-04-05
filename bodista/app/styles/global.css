@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Font Faces — Novela (WOFF2, optimized for web)
+   Font Faces — Novela
    ========================================================================== */
 
 @font-face {
@@ -19,49 +19,17 @@
 }
 
 @font-face {
-  font-family: 'Novela';
-  src: url('/fonts/Novela-Semibold.otf') format('opentype');
-  font-weight: 600;
+  font-family: 'Novela Display';
+  src: url('/fonts/Novela-DisplayRegular.otf') format('opentype');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Novela';
-  src: url('/fonts/Novela-SemiboldItalic.otf') format('opentype');
-  font-weight: 600;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Novela';
-  src: url('/fonts/Novela-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Novela';
-  src: url('/fonts/Novela-BoldItalic.otf') format('opentype');
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Novela';
-  src: url('/fonts/Novela-Black.otf') format('opentype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Novela';
-  src: url('/fonts/Novela-BlackItalic.otf') format('opentype');
-  font-weight: 900;
+  font-family: 'Novela Display';
+  src: url('/fonts/Novela-DisplayItalic.otf') format('opentype');
+  font-weight: 400;
   font-style: italic;
   font-display: swap;
 }
@@ -122,6 +90,41 @@
   --color-dark: #000;
   --color-light: #fff;
   --color-brand: #8C0605;
+  --font-body: 'Novela', Georgia, 'Times New Roman', serif;
+  --font-display: 'Novela Display', Georgia, 'Times New Roman', serif;
+}
+
+/* ==========================================================================
+   Reset
+   ========================================================================== */
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-dark);
+}
+
+hr {
+  border-top: 1px solid var(--color-dark);
+  border-bottom: none;
+  margin: 0;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* ==========================================================================
@@ -137,7 +140,7 @@ html::-webkit-scrollbar {
 }
 
 body {
-  font-family: 'Novela', Georgia, 'Times New Roman', serif;
+  font-family: var(--font-body);
   font-size: var(--size-font);
   display: flex;
   flex-direction: column;
@@ -149,16 +152,18 @@ body > main {
 }
 
 h1 {
+  font-family: var(--font-display);
   font-size: 1.6em;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.4;
   margin-bottom: 2em;
   margin-top: 2em;
 }
 
 h2 {
+  font-family: var(--font-display);
   font-size: 1.2em;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.4;
   margin-bottom: 1em;
 }
@@ -178,17 +183,8 @@ p {
   line-height: 1.4;
 }
 
-a {
-  color: #000;
-}
-
 a:hover {
-  text-decoration: underline;
   cursor: pointer;
-}
-
-hr {
-  border-top: 1px solid #000;
 }
 
 pre {
@@ -222,7 +218,7 @@ form {
 
 input {
   border-radius: 0.25em;
-  border: 1px solid #000;
+  border: 1px solid var(--color-dark);
   font-size: 1em;
   margin-bottom: 0.5em;
   margin-top: 0.25em;
@@ -230,7 +226,7 @@ input {
 }
 
 legend {
-  font-weight: 600;
+  font-family: var(--font-display);
   margin-bottom: 0.5em;
 }
 
@@ -249,22 +245,6 @@ code {
   padding: 0.25em;
 }
 
-/* ==========================================================================
-   Reset Styles
-   ========================================================================== */
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
-h1,
-h2,
-p {
-  margin: 0;
-  padding: 0;
-}
-
 .webgl-active [data-animation="webgl-text"]::selection {
   color: transparent;
   background: Highlight;
@@ -273,10 +253,6 @@ p {
 .webgl-active [data-animation="webgl-text"]::-moz-selection {
   color: transparent;
   background: Highlight;
-}
-
-a {
-  text-decoration: none;
 }
 
 .grain-overlay {
@@ -289,23 +265,12 @@ a {
   opacity: 0.15;
 }
 
-hr {
-  border-bottom: none;
-  margin: 0;
-}
-
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
 /* ==========================================================================
    Utility Classes
    ========================================================================== */
 
 .link:hover {
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -337,7 +302,6 @@ button.reset:not(:has(> *)) {
 }
 
 button.reset:hover:not(:has(> *)) {
-  text-decoration: underline;
   cursor: pointer;
 }
 
@@ -418,7 +382,6 @@ aside li {
   right: 0;
   top: 0;
   transition: opacity 400ms ease-in-out;
-  transition: opacity 400ms;
   visibility: hidden;
   z-index: 1000;
 }
@@ -473,20 +436,28 @@ aside li {
   position: relative;
 }
 
-.menu-panel::before {
+.menu-panel::before,
+.menu-panel::after {
   content: '';
   position: absolute;
-  top: var(--site-header-height);
-  left: 1.5em;
-  right: 1.5em;
+  left: 0;
+  right: 0;
   height: 1px;
   background: rgba(255, 255, 255, 0.2);
+}
+
+.menu-panel::before {
+  top: var(--announcement-height);
+}
+
+.menu-panel::after {
+  top: var(--site-header-height);
 }
 
 .menu-panel-inner {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1.5fr;
-  padding: 1.5em;
+  padding: 0 1.5em 1.5em;
   padding-top: calc(var(--site-header-height) + 1em);
   min-height: calc(18em + var(--site-header-height));
 }
@@ -496,6 +467,10 @@ aside li {
   flex-direction: column;
   padding: 0 1.5em;
   border-right: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: -1em;
+  padding-top: 1em;
+  margin-bottom: -1.5em;
+  padding-bottom: 1.5em;
 }
 
 .menu-panel-column:first-child {
@@ -523,22 +498,20 @@ aside li {
 .menu-panel-links a {
   color: var(--color-light);
   text-decoration: none;
+  font-family: var(--font-display);
   font-size: 1.125em;
-  font-weight: 600;
   line-height: 1.6;
 }
 
 .menu-panel-links a:hover {
-  text-decoration: underline;
+  opacity: 0.8;
 }
 
 .menu-panel-bottom-link {
   margin-top: auto;
   padding-top: 1em;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 0.8125em;
   color: var(--color-light);
-  text-decoration: underline;
   opacity: 0.8;
 }
 
@@ -579,8 +552,8 @@ aside li {
 }
 
 .menu-panel-featured-title {
+  font-family: var(--font-display);
   font-size: 1.125em;
-  font-weight: 700;
   line-height: 1.3;
   text-transform: uppercase;
   margin-bottom: 0.75em;
@@ -623,7 +596,7 @@ aside li {
 }
 
 /* ==========================================================================
-   Site Header (fixed)
+   Site Header
    ========================================================================== */
 
 .site-header-fixed {
@@ -634,10 +607,6 @@ aside li {
   z-index: 1000;
 }
 
-/* ==========================================================================
-   Main Content Wrapper
-   ========================================================================== */
-
 .main-content {
   position: relative;
   z-index: 995;
@@ -646,15 +615,14 @@ aside li {
   padding-top: var(--site-header-height);
 }
 
-/* ==========================================================================
-   Header
-   ========================================================================== */
-
 .announcement-bar {
   background: var(--color-brand);
   color: var(--color-light);
-  text-align: center;
-  padding: 0.4em 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--announcement-height);
+  padding: 0 1em;
   font-size: 0.6875em;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -662,13 +630,16 @@ aside li {
 
 .announcement-bar a {
   color: var(--color-light);
-  text-decoration: underline;
-  font-weight: 600;
+  font-family: var(--font-display);
 }
 
 .announcement-bar a:hover {
   opacity: 0.8;
 }
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
 
 .header-wrapper {
   background: transparent;
@@ -717,6 +688,7 @@ aside li {
   padding: 0;
   font-family: inherit;
   font-size: 0.875em;
+  line-height: 1;
   color: var(--color-dark);
 }
 
@@ -766,6 +738,7 @@ aside li {
   padding: 0;
   font-family: inherit;
   font-size: 0.875em;
+  line-height: 1;
   color: var(--color-dark);
   text-decoration: none;
 }
@@ -1003,114 +976,6 @@ aside li {
 }
 
 /* ==========================================================================
-   Homepage — Marquee
-   ========================================================================== */
-
-.marquee {
-  overflow: hidden;
-  background-color: #1a1a1a;
-  color: #fff;
-  padding: 0.875em 0;
-  white-space: nowrap;
-}
-
-.marquee-track {
-  display: inline-flex;
-  animation: marquee-scroll 20s linear infinite;
-}
-
-.marquee-phrase {
-  font-size: 0.875em;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.marquee-separator {
-  margin: 0 1.5em;
-  opacity: 0.4;
-}
-
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* ==========================================================================
-   Homepage — Liquid Gold
-   ========================================================================== */
-
-.liquid-gold {
-  padding: 5em 1.5em;
-}
-
-.liquid-gold-wrapper {
-  position: relative;
-  max-width: 75em;
-  margin: 0 auto;
-}
-
-.liquid-gold-video {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background-color: #c8c8c8;
-}
-
-.liquid-gold-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.liquid-gold-text {
-  font-size: 2em;
-  font-weight: 300;
-  color: #fff;
-  text-align: center;
-  padding: 1.5em;
-  letter-spacing: 0.02em;
-}
-
-/* ==========================================================================
-   Homepage — Brand Philosophy
-   ========================================================================== */
-
-.philosophy {
-  padding: 5em 1.5em;
-  max-width: 75em;
-  margin: 0 auto;
-}
-
-.philosophy-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3em;
-  align-items: center;
-}
-
-.philosophy-heading {
-  font-size: 2em;
-  font-weight: 300;
-  margin: 0 0 1.5em;
-  color: #1a1a1a;
-}
-
-.philosophy-body {
-  font-size: 1em;
-  line-height: 1.7;
-  color: #555;
-  margin: 0 0 1em;
-}
-
-.philosophy-image {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  background-color: #d1d1d1;
-}
-
-/* ==========================================================================
    Homepage — Product Highlights
    ========================================================================== */
 
@@ -1178,341 +1043,20 @@ aside li {
 }
 
 /* ==========================================================================
-   Homepage — Featured Product
-   ========================================================================== */
-
-.featured {
-  padding: 5em 1.5em;
-  max-width: 75em;
-  margin: 0 auto;
-}
-
-.featured-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3em;
-  align-items: center;
-}
-
-.featured-image {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.featured-image-placeholder {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  background-color: #d1d1d1;
-}
-
-.featured-label {
-  font-size: 0.75em;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #999;
-  margin: 0 0 0.75em;
-}
-
-.featured-product-name {
-  font-size: 2em;
-  font-weight: 300;
-  margin: 0 0 0.75em;
-  color: #1a1a1a;
-}
-
-.featured-price {
-  font-size: 1.125em;
-  color: #1a1a1a;
-  margin: 0 0 1.5em;
-}
-
-.featured-description {
-  font-size: 1em;
-  line-height: 1.7;
-  color: #555;
-  margin: 0 0 2em;
-}
-
-.featured-cta {
-  display: inline-block;
-  padding: 0.875em 2.5em;
-  background-color: #1a1a1a;
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.875em;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: background-color 0.2s;
-}
-
-.featured-cta:hover {
-  background-color: #333;
-}
-
-/* ==========================================================================
-   Homepage — Ritual Advocates
-   ========================================================================== */
-
-.advocates {
-  padding: 5em 1.5em;
-  max-width: 75em;
-  margin: 0 auto;
-}
-
-.advocates-heading {
-  font-size: 2em;
-  font-weight: 300;
-  text-align: center;
-  margin: 0 0 3em;
-  color: #1a1a1a;
-}
-
-.advocates-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2em;
-}
-
-.advocates-card {
-  text-align: center;
-}
-
-.advocates-video {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background-color: #c8c8c8;
-  margin-bottom: 1em;
-}
-
-.advocates-name {
-  font-size: 1em;
-  font-weight: 400;
-  margin: 0 0 0.25em;
-  color: #1a1a1a;
-}
-
-.advocates-link {
-  font-size: 0.875em;
-  color: #666;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.advocates-link:hover {
-  color: #1a1a1a;
-}
-
-/* ==========================================================================
-   Homepage — Testimonials
-   ========================================================================== */
-
-.testimonials {
-  padding: 4em 1.5em;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.testimonials-track {
-  display: flex;
-  gap: 1px;
-  max-width: 75em;
-  margin: 0 auto;
-}
-
-.testimonial {
-  flex: 0 0 15em;
-  padding: 1.5em 2em;
-  margin: 0;
-  border-right: 1px solid #e0e0e0;
-}
-
-.testimonial:last-child {
-  border-right: none;
-}
-
-.testimonial-quote {
-  font-size: 0.9375em;
-  line-height: 1.6;
-  color: #444;
-  margin: 0 0 1em;
-  font-style: italic;
-}
-
-.testimonial-author {
-  font-size: 0.8125em;
-  color: #999;
-  font-style: normal;
-}
-
-/* ==========================================================================
-   Homepage — Social Grid
-   ========================================================================== */
-
-.social {
-  padding: 5em 1.5em;
-  max-width: 75em;
-  margin: 0 auto;
-}
-
-.social-heading {
-  font-size: 1.5em;
-  font-weight: 300;
-  text-align: center;
-  margin: 0 0 3em;
-  color: #1a1a1a;
-}
-
-.social-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1em;
-}
-
-.social-item {
-  text-align: center;
-}
-
-.social-image {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background-color: #d1d1d1;
-  margin-bottom: 0.5em;
-}
-
-.social-caption {
-  font-size: 0.8125em;
-  color: #777;
-  margin: 0;
-}
-
-/* ==========================================================================
-   Homepage — Blog Preview
-   ========================================================================== */
-
-.blog-preview {
-  padding: 5em 1.5em;
-  max-width: 75em;
-  margin: 0 auto;
-}
-
-.blog-preview-heading {
-  font-size: 2em;
-  font-weight: 300;
-  text-align: center;
-  margin: 0 0 3em;
-  color: #1a1a1a;
-}
-
-.blog-preview-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2em;
-}
-
-.blog-preview-card {
-  text-align: left;
-}
-
-.blog-preview-image {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background-color: #d1d1d1;
-  margin-bottom: 1em;
-}
-
-.blog-preview-title {
-  font-size: 1.0625em;
-  font-weight: 400;
-  margin: 0 0 0.5em;
-  color: #1a1a1a;
-  line-height: 1.4;
-}
-
-.blog-preview-excerpt {
-  font-size: 0.875em;
-  line-height: 1.6;
-  color: #666;
-  margin: 0 0 0.75em;
-}
-
-.blog-preview-link {
-  font-size: 0.8125em;
-  color: #999;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.blog-preview-link:hover {
-  color: #1a1a1a;
-}
-
-/* ==========================================================================
    Homepage — Responsive
    ========================================================================== */
 
 @media (max-width: 767px) {
   .hero-headline { font-size: 2.25em; }
-  .liquid-gold-text { font-size: 1.25em; }
 
-  .philosophy-grid,
-  .featured-grid,
-  .advocates-grid,
-  .highlights-grid,
-  .blog-preview-grid {
+  .highlights-grid {
     grid-template-columns: 1fr;
     gap: 2em;
   }
 
-  .social-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .philosophy-heading,
-  .highlights-heading,
-  .advocates-heading,
-  .blog-preview-heading {
+  .highlights-heading {
     font-size: 1.5em;
   }
-
-  .featured-product-name { font-size: 1.5em; }
-  .social-heading { font-size: 1.25em; }
-}
-
-/* ==========================================================================
-   Legacy Homepage (unused, kept for reference)
-   ========================================================================== */
-
-.featured-collection {
-  display: block;
-  margin-bottom: 2em;
-  position: relative;
-}
-
-.featured-collection-image {
-  aspect-ratio: 1 / 1;
-  @media (min-width: 45em) {
-    aspect-ratio: 16 / 9;
-  }
-}
-
-.featured-collection img {
-  height: auto;
-  max-height: 100%;
-  object-fit: cover;
-}
-
-.recommended-products-grid {
-  display: grid;
-  grid-gap: 1.5em;
-  grid-template-columns: repeat(2, 1fr);
-  @media (min-width: 45em) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.recommended-product img {
-  height: auto;
 }
 
 /* ==========================================================================
@@ -1658,7 +1202,7 @@ aside li {
 }
 
 .order-search-legend {
-  font-weight: 600;
+  font-family: var(--font-display);
   padding: 0 0.5em;
 }
 

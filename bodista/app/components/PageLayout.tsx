@@ -53,8 +53,10 @@ export function PageLayout({
   const mainContentInnerRef = useRef<HTMLDivElement>(null)
   const menuPanelRef = useRef<HTMLDivElement>(null)
   const scrollYRef = useRef(0)
+  const isAnimatingRef = useRef(false)
 
   const toggleMenu = useCallback(() => {
+    if (isAnimatingRef.current) return
     setIsMenuOpen((prev) => !prev)
   }, [])
 
@@ -66,6 +68,7 @@ export function PageLayout({
     const menuHeight = menuPanelRef.current.offsetHeight
 
     if (isMenuOpen) {
+      isAnimatingRef.current = true
       // Capture scroll and stop Lenis
       scrollYRef.current = window.scrollY || 0
       if (lenis) lenis.stop()
@@ -99,8 +102,12 @@ export function PageLayout({
         y: menuHeight,
         duration: 0.6,
         ease: 'osmo',
+        onComplete: () => {
+          isAnimatingRef.current = false
+        },
       })
     } else {
+      isAnimatingRef.current = true
       // Slide back up
       gsap.to(outer, {
         y: 0,
@@ -119,6 +126,7 @@ export function PageLayout({
             lenis.start()
             lenis.resize()
           }
+          isAnimatingRef.current = false
         },
       })
     }
