@@ -85,11 +85,11 @@
   --cart-aside-summary-height: 15.625em;
   --grid-item-width: 22.1875em;
   --header-height: 3em;
-  --announcement-height: 1.7em;
-  --site-header-height: calc(var(--announcement-height) + var(--header-height));
+  --site-header-height: var(--header-height);
   --color-dark: #000;
   --color-light: #fff;
   --color-brand: #8C0605;
+  --color-bg: #D1C9BD;
   --font-body: 'Novela', Georgia, 'Times New Roman', serif;
   --font-display: 'Novela Display', Georgia, 'Times New Roman', serif;
 }
@@ -145,6 +145,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: var(--color-bg);
 }
 
 body > main {
@@ -436,22 +437,14 @@ aside li {
   position: relative;
 }
 
-.menu-panel::before,
-.menu-panel::after {
+.menu-panel::before {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
+  top: var(--site-header-height);
   height: 1px;
   background: rgba(255, 255, 255, 0.2);
-}
-
-.menu-panel::before {
-  top: var(--announcement-height);
-}
-
-.menu-panel::after {
-  top: var(--site-header-height);
 }
 
 .menu-panel-inner {
@@ -610,31 +603,9 @@ aside li {
 .main-content {
   position: relative;
   z-index: 995;
-  background: var(--color-light);
+  background: var(--color-bg);
   will-change: transform;
   padding-top: var(--site-header-height);
-}
-
-.announcement-bar {
-  background: var(--color-brand);
-  color: var(--color-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--announcement-height);
-  padding: 0 1em;
-  font-size: 0.6875em;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.announcement-bar a {
-  color: var(--color-light);
-  font-family: var(--font-display);
-}
-
-.announcement-bar a:hover {
-  opacity: 0.8;
 }
 
 /* ==========================================================================
@@ -912,67 +883,8 @@ aside li {
    ========================================================================== */
 
 .hero {
-  width: 100%;
-  height: calc(100vh - 3em);
-  min-height: 31.25em;
-}
-
-.hero-backdrop {
-  width: 100%;
-  height: 100%;
-  background-color: #d1d1d1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-bg-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 40em;
-  padding: 1.5em;
-}
-
-.hero-headline {
-  font-size: 3.5em;
-  font-weight: 300;
-  letter-spacing: 0.02em;
-  margin: 0 0 1em;
-  color: #1a1a1a;
-}
-
-.hero-subtext {
-  font-size: 1.125em;
-  line-height: 1.6;
-  color: #444;
-  margin: 0 0 2em;
-}
-
-.hero-cta {
-  display: inline-block;
-  padding: 0.875em 2.5em;
-  background-color: #1a1a1a;
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.875em;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: background-color 0.2s;
-}
-
-.hero-cta:hover {
-  background-color: #333;
+  width: 100vw;
+  height: 100vh;
 }
 
 /* ==========================================================================
@@ -1047,8 +959,6 @@ aside li {
    ========================================================================== */
 
 @media (max-width: 767px) {
-  .hero-headline { font-size: 2.25em; }
-
   .highlights-grid {
     grid-template-columns: 1fr;
     gap: 2em;

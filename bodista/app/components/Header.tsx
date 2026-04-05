@@ -54,14 +54,14 @@ function MenuToggle() {
     <button
       className="header-menu-toggle reset"
       onClick={toggleMenu}
-      aria-label="Open menu"
+      aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
       aria-expanded={isMenuOpen}
     >
       <div className="header-menu-toggle-icon">
         <span />
         <span />
       </div>
-      menu
+      {isMenuOpen ? 'close' : 'menu'}
     </button>
   )
 }

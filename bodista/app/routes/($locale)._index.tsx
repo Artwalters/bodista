@@ -41,7 +41,7 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="home">
-      <HeroHeader collection={data.featuredCollection} />
+      <HeroHeader />
       <Suspense fallback={<div />}>
         <Await resolve={data.recommendedProducts}>
           {(response) => {

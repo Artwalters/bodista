@@ -100,7 +100,7 @@ export function PageLayout({
       // Slide the whole frozen page down
       gsap.to(outer, {
         y: menuHeight,
-        duration: 0.6,
+        duration: 1.6,
         ease: 'osmo',
         onComplete: () => {
           isAnimatingRef.current = false
@@ -111,7 +111,7 @@ export function PageLayout({
       // Slide back up
       gsap.to(outer, {
         y: 0,
-        duration: 0.6,
+        duration: 1.6,
         ease: 'osmo',
         onComplete: () => {
           // Clear all inline styles
@@ -140,10 +140,6 @@ export function PageLayout({
         <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
 
         <div className="site-header-fixed">
-          <div className="announcement-bar">
-            FREE FROM SOAP &amp; ADDITIVES |{' '}
-            <a href="/pages/about">DISCOVER BODISTA</a>
-          </div>
           {header && (
             <Header
               header={header}
@@ -158,7 +154,11 @@ export function PageLayout({
           <MenuPanel />
         </div>
 
-        <div className="main-content" ref={mainContentRef}>
+        <div
+          className="main-content"
+          ref={mainContentRef}
+          onClick={() => { if (isMenuOpen) toggleMenu() }}
+        >
           <div ref={mainContentInnerRef}>
             <main>{children}</main>
             <Footer
