@@ -70,8 +70,18 @@ export function HeroHeader() {
       await document.fonts.ready
 
       const THREE = await import('three')
-      const {generateTextEmboss} = await import('~/lib/normalMapGenerator')
+      const {generateImageEmboss} = await import('~/lib/normalMapGenerator')
       const {getLenisInstance} = await import('~/lib/lenis')
+
+      if (cancelled) return
+
+      // Load SVG logo
+      const logo = new Image()
+      logo.src = '/assets/logos/bodista_logo.svg'
+      await new Promise<void>((resolve, reject) => {
+        logo.onload = () => resolve()
+        logo.onerror = () => reject(new Error('Failed to load logo'))
+      })
 
       if (cancelled) return
 
@@ -106,16 +116,15 @@ export function HeroHeader() {
       const dpr = Math.min(window.devicePixelRatio, 2)
       const texW = Math.round(bounds.width * dpr)
       const texH = Math.round(bounds.height * dpr)
-      const fontSize = Math.round(bounds.width * 0.30 * dpr)
-      const {normalMap, heightMap} = generateTextEmboss('bodista', {
-        fontSize,
-        fontFamily: "'Novela Display', serif",
+      const {normalMap, heightMap} = generateImageEmboss(logo, {
         width: texW,
         height: texH,
         bevelWidth: 8,
         depth: 0.6,
         strength: 3.0,
-        textAlign: 'left',
+        padding: 0,
+        bottomOffset: Math.round(texH * 0.04),
+        alignBottom: true,
       })
 
       const material = new THREE.ShaderMaterial({
@@ -211,7 +220,9 @@ export function HeroHeader() {
           </div>
         </div>
       </div>
-      <div className="hero-image" />
+      <div className="hero-image">
+        <img src="/images/hero test.jpg" alt="" />
+      </div>
     </section>
   )
 }

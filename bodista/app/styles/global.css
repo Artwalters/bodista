@@ -881,7 +881,7 @@ aside li {
 
 .hero-emboss {
   position: relative;
-  width: 66.666%;
+  width: 75%;
   height: 20vw;
   overflow: hidden;
   flex-shrink: 0;
@@ -921,8 +921,7 @@ aside li {
 }
 
 .hero-image {
-  flex: 1;
-  min-height: 0;
+  height: 100vh;
   overflow: hidden;
   background: #3a3a3a;
   border-radius: 0.25em;

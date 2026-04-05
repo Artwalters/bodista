@@ -184,6 +184,86 @@ export const generateTextEmboss = (
   const textY = height - fontSize * 0.3
   ctx.fillText(text, textX, textY)
 
+  return embossFromCanvas(canvas, width, height, bevelWidth, depth, strength)
+}
+
+/**
+ * Generates emboss textures from an image source (e.g. SVG logo).
+ * Draws the image in white on black and runs the same distance field pipeline.
+ */
+export const generateImageEmboss = (
+  img: HTMLImageElement,
+  options: {
+    width?: number
+    height?: number
+    bevelWidth?: number
+    depth?: number
+    strength?: number
+    padding?: number
+    bottomOffset?: number
+    alignBottom?: boolean
+  } = {}
+): { normalMap: THREE.CanvasTexture, heightMap: THREE.CanvasTexture } => {
+  const {
+    width = 1024,
+    height = 512,
+    bevelWidth = 12,
+    depth = 1.0,
+    strength = 2.0,
+    padding = 0,
+    bottomOffset = 0,
+    alignBottom = true,
+  } = options
+
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')!
+
+  ctx.fillStyle = '#000000'
+  ctx.fillRect(0, 0, width, height)
+
+  // Scale logo to fit width
+  const availW = width - padding * 2
+  const scale = (availW / img.naturalWidth) * 1.05
+  const drawW = img.naturalWidth * scale
+  const drawH = img.naturalHeight * scale
+  const drawX = padding
+  const drawY = alignBottom ? height - drawH - bottomOffset : (height - drawH) / 2
+
+  // Draw in white using compositing
+  ctx.drawImage(img, drawX, drawY, drawW, drawH)
+
+  // The SVG has white fills, so the image is already white on black
+  // But if the SVG had other colors, force everything non-black to white
+  const imgData = ctx.getImageData(0, 0, width, height)
+  const px = imgData.data
+  for (let i = 0; i < px.length; i += 4) {
+    const lum = px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114
+    const val = lum > 30 ? 255 : 0
+    px[i] = val
+    px[i + 1] = val
+    px[i + 2] = val
+    px[i + 3] = 255
+  }
+  ctx.putImageData(imgData, 0, 0)
+
+  return embossFromCanvas(canvas, width, height, bevelWidth, depth, strength)
+}
+
+/**
+ * Shared emboss pipeline: takes a black/white canvas and produces normal + height map.
+ */
+const embossFromCanvas = (
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number,
+  bevelWidth: number,
+  depth: number,
+  strength: number,
+): { normalMap: THREE.CanvasTexture, heightMap: THREE.CanvasTexture } => {
+  const ctx = canvas.getContext('2d')!
+
   const imgData = ctx.getImageData(0, 0, width, height)
   const pixels = imgData.data
 
