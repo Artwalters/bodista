@@ -34,12 +34,16 @@ export function Header({
         <div className="header-left">
           <MenuToggle />
         </div>
-        <NavLink prefetch="intent" to="/" className="header-logo">
-          <img
-            src="/assets/logos/bodista_logo.svg"
-            alt={shop.name}
-          />
-        </NavLink>
+        <div className="header-center">
+          <NavLink prefetch="intent" to="/" className="header-logo-text">
+            a
+          </NavLink>
+          <div className="header-locations">
+            <span>london</span>
+            <span>newyork</span>
+            <span>ibiza</span>
+          </div>
+        </div>
         <div className="header-right">
           <CartToggle cart={cart} />
         </div>
@@ -57,10 +61,6 @@ function MenuToggle() {
       aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
       aria-expanded={isMenuOpen}
     >
-      <div className="header-menu-toggle-icon">
-        <span />
-        <span />
-      </div>
       {isMenuOpen ? 'close' : 'menu'}
     </button>
   )
@@ -166,10 +166,7 @@ function CartBadge({count}: {count: number | null}) {
         } as CartViewPayload)
       }}
     >
-      bag
-      <div className="header-bag-icon">
-        <BagIcon />
-      </div>
+      cart({count ?? 0})
     </a>
   )
 }

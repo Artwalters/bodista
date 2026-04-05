@@ -155,6 +155,7 @@ export const generateTextEmboss = (
     bevelWidth?: number
     depth?: number
     strength?: number
+    textAlign?: CanvasTextAlign
   } = {}
 ): { normalMap: THREE.CanvasTexture, heightMap: THREE.CanvasTexture } => {
   const {
@@ -165,6 +166,7 @@ export const generateTextEmboss = (
     bevelWidth = 12,
     depth = 1.0,
     strength = 2.0,
+    textAlign = 'center',
   } = options
 
   const canvas = document.createElement('canvas')
@@ -176,9 +178,11 @@ export const generateTextEmboss = (
   ctx.fillRect(0, 0, width, height)
   ctx.fillStyle = '#ffffff'
   ctx.font = `${fontSize}px ${fontFamily}`
-  ctx.textAlign = 'center'
+  ctx.textAlign = textAlign
   ctx.textBaseline = 'middle'
-  ctx.fillText(text, width / 2, height / 2)
+  const textX = textAlign === 'left' ? 0 : textAlign === 'right' ? width : width / 2
+  const textY = height - fontSize * 0.3
+  ctx.fillText(text, textX, textY)
 
   const imgData = ctx.getImageData(0, 0, width, height)
   const pixels = imgData.data

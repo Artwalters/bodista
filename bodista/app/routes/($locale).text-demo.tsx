@@ -387,7 +387,7 @@ export default function TextDemo() {
 
       canvas = renderer.domElement;
       canvas.style.cssText =
-        'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:10;';
+        'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:996;';
       document.body.appendChild(canvas);
 
       /* ── Scene ── */
