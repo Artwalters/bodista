@@ -5,8 +5,10 @@ import {Suspense, useId, useEffect, useRef, useState, createContext, useContext,
 import {gsap} from 'gsap'
 import {CustomEase} from 'gsap/CustomEase'
 
-gsap.registerPlugin(CustomEase)
-CustomEase.create('osmo', 'M0,0 C0.625,0.05 0,1 1,1')
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(CustomEase)
+  CustomEase.create('osmo', 'M0,0 C0.625,0.05 0,1 1,1')
+}
 import type {
   CartApiQueryFragment,
   FooterQuery,

@@ -16,7 +16,7 @@ export function MenuPanel() {
             <NavLink to="/collections/scalp" prefetch="intent">Scalp</NavLink>
           </nav>
           <a href="/collections" className="menu-panel-bottom-link">
-            shop all <span className="menu-panel-arrow">&#8599;</span>
+            shop all <svg className="menu-panel-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19L21 12L14 5" stroke="currentColor" strokeMiterlimit="10" /><path d="M21 12H2" stroke="currentColor" strokeMiterlimit="10" /></svg>
           </a>
         </div>
 
@@ -29,7 +29,7 @@ export function MenuPanel() {
             <NavLink to="/pages/learn-more" prefetch="intent">Learn More</NavLink>
           </nav>
           <a href="/blogs/research" className="menu-panel-bottom-link">
-            research papers <span className="menu-panel-arrow">&#8599;</span>
+            research papers <svg className="menu-panel-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19L21 12L14 5" stroke="currentColor" strokeMiterlimit="10" /><path d="M21 12H2" stroke="currentColor" strokeMiterlimit="10" /></svg>
           </a>
         </div>
 
@@ -53,13 +53,10 @@ export function MenuPanel() {
             <h3 className="menu-panel-featured-title">
               HOW DO WE STAY HUMAN <em>in</em> AN AI GENERATED <em>world?</em>
             </h3>
-            <div className="menu-panel-featured-image">
-              <img src="/assets/logos/bodista_logo.svg" alt="" />
-            </div>
           </div>
           <div className="menu-panel-featured-footer">
             <span>10 min read</span>
-            <span className="menu-panel-featured-arrow">&rarr;</span>
+            <svg className="menu-panel-featured-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19L21 12L14 5" stroke="currentColor" strokeMiterlimit="10" /><path d="M21 12H2" stroke="currentColor" strokeMiterlimit="10" /></svg>
           </div>
         </div>
       </div>
