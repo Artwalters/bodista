@@ -2,6 +2,7 @@
 
 import {useEffect, useRef} from 'react'
 import {Link} from 'react-router'
+import {ShadowOverlay} from './ShadowOverlay'
 
 const embossVertShader = /* glsl */ `
 varying vec2 vUv;
@@ -203,6 +204,7 @@ export function HeroHeader() {
 
   return (
     <section className="hero">
+      <ShadowOverlay />
       <div className="hero-top">
         <div className="hero-emboss" ref={embossRef} />
         <div className="hero-copy">
@@ -214,7 +216,10 @@ export function HeroHeader() {
             <hr />
             <Link to="/collections" className="hero-copy-link-inner">
               <span>shop all products</span>
-              <span className="hero-copy-arrow">&#8599;</span>
+              <svg className="hero-copy-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 19L21 12L14 5" stroke="currentColor" strokeMiterlimit="10" />
+                <path d="M21 12H2" stroke="currentColor" strokeMiterlimit="10" />
+              </svg>
             </Link>
             <hr />
           </div>

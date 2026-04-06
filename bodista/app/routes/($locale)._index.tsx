@@ -2,6 +2,7 @@ import {Await, useLoaderData} from 'react-router';
 import type {Route} from './+types/_index';
 import {Suspense} from 'react';
 import {HeroHeader} from '~/components/home/HeroHeader';
+import {AboutSection} from '~/components/home/AboutSection';
 import {ProductHighlights} from '~/components/home/ProductHighlights';
 
 export const meta: Route.MetaFunction = () => {
@@ -42,6 +43,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <HeroHeader />
+      <AboutSection />
       <Suspense fallback={<div />}>
         <Await resolve={data.recommendedProducts}>
           {(response) => {
