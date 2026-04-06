@@ -7,3 +7,12 @@ node_modules
 .env
 .shopify
 .react-router
+.playwright-mcp
+
+# Dev screenshots & test images
+*.png
+header-new.png
+hero-em.png
+hero-v*.png
+image*.png
+text-demo-*.png
