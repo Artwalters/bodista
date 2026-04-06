@@ -1,7 +1,9 @@
 'use client'
 
-import {Suspense} from 'react'
+import {Suspense, useEffect, useRef} from 'react'
 import {Await, NavLink, useAsyncValue} from 'react-router'
+import gsap from 'gsap'
+import {ScrollTrigger} from 'gsap/ScrollTrigger'
 import {
   type CartViewPayload,
   useAnalytics,
@@ -28,6 +30,61 @@ export function Header({
 }: HeaderProps) {
   const {shop, menu} = header
   const {isMenuOpen} = useMenu()
+  const locationsRef = useRef<HTMLDivElement>(null)
+  const logoRef = useRef<HTMLSpanElement>(null)
+  const tlRef = useRef<gsap.core.Timeline | null>(null)
+
+  // Build timeline once
+  useEffect(() => {
+    const locations = locationsRef.current
+    const logo = logoRef.current
+    if (!locations || !logo) return
+
+    const masks = locations.querySelectorAll('.header-location-mask')
+    const spans = Array.from(masks).map((m) => m.querySelector('span'))
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({paused: true})
+
+      tl.to(spans, {
+        yPercent: 110,
+        duration: 0.4,
+        stagger: {each: 0.05, from: 'end'},
+        ease: 'expo.in',
+      })
+
+      tl.to(logo, {
+        autoAlpha: 0,
+        duration: 0.4,
+      })
+
+      tlRef.current = tl
+
+      // Trigger on scroll
+      ScrollTrigger.create({
+        trigger: document.documentElement,
+        start: 'top -1',
+        onEnter: () => tl.play(),
+        onLeaveBack: () => tl.reverse(),
+      })
+    })
+
+    return () => ctx.revert()
+  }, [])
+
+  // Trigger on menu open/close
+  useEffect(() => {
+    if (!tlRef.current) return
+    if (isMenuOpen) {
+      tlRef.current.play()
+    } else if (window.scrollY <= 0) {
+      // Wait for menu close animation (1.6s) before reversing
+      gsap.delayedCall(1.6, () => {
+        if (!isMenuOpen) tlRef.current?.reverse()
+      })
+    }
+  }, [isMenuOpen])
+
   return (
     <div className="header-wrapper" data-menu-open={isMenuOpen || undefined}>
       <header className="header">
@@ -35,13 +92,21 @@ export function Header({
           <MenuToggle />
         </div>
         <div className="header-center">
-          <NavLink prefetch="intent" to="/" className="header-logo-text">
-            a
-          </NavLink>
-          <div className="header-locations">
-            <span>london</span>
-            <span>newyork</span>
-            <span>ibiza</span>
+          <span ref={logoRef}>
+            <NavLink prefetch="intent" to="/" className="header-logo-text">
+              a
+            </NavLink>
+          </span>
+          <div className="header-locations" ref={locationsRef}>
+            <div className="header-location-mask">
+              <span>london</span>
+            </div>
+            <div className="header-location-mask">
+              <span>newyork</span>
+            </div>
+            <div className="header-location-mask">
+              <span>ibiza</span>
+            </div>
           </div>
         </div>
         <div className="header-right">

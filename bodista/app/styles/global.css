@@ -677,16 +677,24 @@ aside li {
   color: var(--color-dark);
 }
 
-.header-locations span:not(:first-child) {
+.header-location-mask {
+  overflow: hidden;
+}
+
+.header-location-mask span {
+  display: block;
+}
+
+.header-location-mask:not(:first-child) {
   position: absolute;
   left: 0;
 }
 
-.header-locations span:nth-child(2) {
+.header-location-mask:nth-child(2) {
   top: calc(100% + 0em);
 }
 
-.header-locations span:nth-child(3) {
+.header-location-mask:nth-child(3) {
   top: calc(100% + 1.4em);
 }
 
