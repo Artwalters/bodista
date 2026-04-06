@@ -105,10 +105,11 @@ void main() {
   float diagFade = 1.0 - smoothstep(0.2, 1.2, (uv.x * 0.3 + uv.y * 0.7));
   shadow *= diagFade;
 
-  /* Light leaks — slow moving warm spots */
+  /* Light leaks — slow moving warm spots with detail */
   float leak1 = snoise(st * 0.4 + vec2(t * 0.05, t * 0.03));
   float leak2 = snoise(st * 0.6 + vec2(-t * 0.04, t * 0.06) + vec2(10.0, 5.0));
-  float leaks = smoothstep(0.2, 0.7, leak1) * 0.6 + smoothstep(0.3, 0.8, leak2) * 0.4;
+  float leak3 = snoise(st * 1.2 + vec2(t * 0.03, -t * 0.05) + vec2(3.0, 8.0));
+  float leaks = smoothstep(0.2, 0.7, leak1) * 0.45 + smoothstep(0.3, 0.8, leak2) * 0.35 + smoothstep(0.15, 0.65, leak3) * 0.2;
   leaks *= (1.0 - shadow) * diagFade;
 
   /* Mix between warm sunlight and soft shadow */
@@ -116,8 +117,8 @@ void main() {
   vec3 leakColor = vec3(1.0, 0.82, 0.45);
   vec3 coolShadow = vec3(0.15, 0.1, 0.05);
   vec3 color = mix(warmLight, coolShadow, shadow);
-  color += leakColor * leaks * 0.3;
-  float alpha = mix(0.1, 0.18, shadow) + leaks * 0.12;
+  color += leakColor * leaks * 0.5;
+  float alpha = mix(0.06, 0.12, shadow) + leaks * 0.2;
 
   gl_FragColor = vec4(color, alpha);
 }
