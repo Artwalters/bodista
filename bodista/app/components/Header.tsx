@@ -33,6 +33,8 @@ export function Header({
   const locationsRef = useRef<HTMLDivElement>(null)
   const logoRef = useRef<HTMLSpanElement>(null)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const stRef = useRef<ScrollTrigger | null>(null)
+  const menuOpenRef = useRef(isMenuOpen)
 
   // Build timeline once
   useEffect(() => {
@@ -61,7 +63,7 @@ export function Header({
       tlRef.current = tl
 
       // Trigger on scroll
-      ScrollTrigger.create({
+      stRef.current = ScrollTrigger.create({
         trigger: document.documentElement,
         start: 'top -1',
         onEnter: () => tl.play(),
@@ -74,13 +76,21 @@ export function Header({
 
   // Trigger on menu open/close
   useEffect(() => {
-    if (!tlRef.current) return
+    menuOpenRef.current = isMenuOpen
+    if (!tlRef.current || !stRef.current) return
     if (isMenuOpen) {
-      tlRef.current.play()
-    } else if (window.scrollY <= 0) {
-      // Wait for menu close animation (1.6s) before reversing
+      stRef.current.disable()
+      tlRef.current.pause()
+      gsap.to(tlRef.current, {progress: 1, duration: 0.3, ease: 'expo.in'})
+    } else {
+      // Wait for menu close animation (1.6s) before re-enabling
       gsap.delayedCall(1.6, () => {
-        if (!isMenuOpen) tlRef.current?.reverse()
+        if (!menuOpenRef.current) {
+          stRef.current?.enable()
+          if (window.scrollY <= 0) {
+            tlRef.current?.reverse()
+          }
+        }
       })
     }
   }, [isMenuOpen])
