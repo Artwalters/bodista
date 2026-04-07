@@ -120,6 +120,12 @@ export function Header({
           </div>
         </div>
         <div className="header-right">
+          <NavLink to="/search" prefetch="intent" className="header-search">
+            search
+          </NavLink>
+          <NavLink to="/account" prefetch="intent" className="header-search">
+            profile
+          </NavLink>
           <CartToggle cart={cart} />
         </div>
       </header>
@@ -241,7 +247,7 @@ function CartBadge({count}: {count: number | null}) {
         } as CartViewPayload)
       }}
     >
-      cart({count ?? 0})
+      cart(<span className="header-bag-count">{count ?? 0}</span>)
     </a>
   )
 }

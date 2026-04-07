@@ -120,6 +120,10 @@ void main() {
   color += leakColor * leaks * 0.5;
   float alpha = mix(0.06, 0.12, shadow) + leaks * 0.2;
 
+  /* Soft fade-out near the bottom edge to blend into background */
+  float bottomFade = smoothstep(0.0, 0.35, uv.y);
+  alpha *= bottomFade;
+
   gl_FragColor = vec4(color, alpha);
 }
 `

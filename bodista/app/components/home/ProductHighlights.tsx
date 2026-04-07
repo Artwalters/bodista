@@ -1,3 +1,4 @@
+import {useEffect, useRef} from 'react'
 import {Link} from 'react-router'
 import {Image} from '@shopify/hydrogen'
 import {AddToCartButton} from '~/components/AddToCartButton'
@@ -9,14 +10,60 @@ export function ProductHighlights({
   products: any[]
 }) {
   const {open} = useAside()
+  const headerRef = useRef<HTMLDivElement>(null)
+  const titleLeftRef = useRef<HTMLHeadingElement>(null)
+  const titleRightRef = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    if (!headerRef.current || !titleLeftRef.current || !titleRightRef.current)
+      return
+
+    let ctx: any
+    let scrollTrigger: any
+
+    const init = async () => {
+      const gsap = (await import('gsap')).default
+      const {ScrollTrigger} = await import('gsap/ScrollTrigger')
+      gsap.registerPlugin(ScrollTrigger)
+
+      ctx = gsap.context(() => {
+        const tween = gsap.fromTo(
+          [titleLeftRef.current, titleRightRef.current],
+          {x: (i) => (i === 0 ? '0.5em' : '-0.5em')},
+          {
+            x: '0em',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: 'top bottom',
+              end: 'bottom 60%',
+              scrub: true,
+            },
+          },
+        )
+        scrollTrigger = tween.scrollTrigger
+      })
+    }
+
+    init()
+
+    return () => {
+      scrollTrigger?.kill()
+      ctx?.revert()
+    }
+  }, [])
 
   if (!products.length) return null
 
   return (
     <section className="products-section">
-      <div className="products-header">
-        <h2 className="products-title-left">All</h2>
-        <h2 className="products-title-right">Products</h2>
+      <div className="products-header" ref={headerRef}>
+        <h2 className="products-title-left" ref={titleLeftRef}>
+          All
+        </h2>
+        <h2 className="products-title-right" ref={titleRightRef}>
+          Products
+        </h2>
       </div>
       <hr className="products-divider" />
       <div className="products-toolbar">

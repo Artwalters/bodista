@@ -92,6 +92,16 @@
   --color-bg: #D1C9BD;
   --font-body: 'Novela', Georgia, 'Times New Roman', serif;
   --font-display: 'Novela Display', Georgia, 'Times New Roman', serif;
+
+  /* Font size scale */
+  --font-xs: 0.75em;
+  --font-sm: 0.875em;
+  --font-base: 1em;
+  --font-md: 1.125em;
+  --font-lg: 1.25em;
+  --font-xl: 1.5em;
+  --font-2xl: 2em;
+  --font-3xl: 3.5em;
 }
 
 /* ==========================================================================
@@ -154,7 +164,7 @@ body > main {
 
 h1 {
   font-family: var(--font-display);
-  font-size: 1.6em;
+  font-size: var(--font-xl);
   font-weight: 400;
   line-height: 1.4;
   margin-bottom: 2em;
@@ -163,7 +173,7 @@ h1 {
 
 h2 {
   font-family: var(--font-display);
-  font-size: 1.2em;
+  font-size: var(--font-lg);
   font-weight: 400;
   line-height: 1.4;
   margin-bottom: 1em;
@@ -180,7 +190,7 @@ h5 {
 }
 
 p {
-  font-size: 1em;
+  font-size: var(--font-base);
   line-height: 1.4;
 }
 
@@ -220,7 +230,7 @@ form {
 input {
   border-radius: 0.25em;
   border: 1px solid var(--color-dark);
-  font-size: 1em;
+  font-size: var(--font-base);
   margin-bottom: 0.5em;
   margin-top: 0.25em;
   padding: 0.5em;
@@ -265,8 +275,8 @@ body::after {
   height: 100%;
   z-index: 9999;
   pointer-events: none;
-  background: url('/assets/logos/plaster.png') repeat;
-  background-size: 60em 60em;
+  background: url('/assets/logos/white-recycle-paper-texture.jpg') repeat;
+  background-size: 20em 20em;
   mix-blend-mode: multiply;
   opacity: 0.5;
 }
@@ -485,7 +495,7 @@ aside li {
 }
 
 .menu-panel-heading {
-  font-size: 0.8125em;
+  font-size: var(--font-sm);
   opacity: 0.7;
   margin-bottom: 1.5em;
   display: block;
@@ -501,7 +511,7 @@ aside li {
   color: var(--color-light);
   text-decoration: none;
   font-family: var(--font-display);
-  font-size: 1.125em;
+  font-size: var(--font-md);
   line-height: 1.6;
 }
 
@@ -512,7 +522,7 @@ aside li {
 .menu-panel-bottom-link {
   margin-top: auto;
   padding-top: 1em;
-  font-size: 0.8125em;
+  font-size: var(--font-sm);
   color: var(--color-light);
   opacity: 0.8;
   display: inline-flex;
@@ -549,7 +559,7 @@ aside li {
 }
 
 .menu-panel-social-handle {
-  font-size: 0.75em;
+  font-size: var(--font-xs);
   opacity: 0.7;
 }
 
@@ -565,7 +575,7 @@ aside li {
 
 .menu-panel-featured-title {
   font-family: var(--font-display);
-  font-size: 1.4em;
+  font-size: var(--font-xl);
   line-height: 1.3;
   text-transform: uppercase;
   max-width: 10em;
@@ -599,7 +609,7 @@ aside li {
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  font-size: 0.75em;
+  font-size: var(--font-xs);
   opacity: 0.7;
 }
 
@@ -640,7 +650,8 @@ aside li {
 
 /* Color switch when menu is open */
 .header-wrapper[data-menu-open] .header-menu-toggle,
-.header-wrapper[data-menu-open] .header-bag {
+.header-wrapper[data-menu-open] .header-bag,
+.header-wrapper[data-menu-open] .header-search {
   color: var(--color-light);
   transition: color 0.4s ease;
 }
@@ -672,7 +683,7 @@ aside li {
   transition: color 0.4s ease 1.1s;
   padding: 0;
   font-family: inherit;
-  font-size: 0.875em;
+  font-size: var(--font-sm);
   line-height: 1;
   color: var(--color-dark);
 }
@@ -687,7 +698,7 @@ aside li {
 
 .header-logo-text {
   font-family: var(--font-display);
-  font-size: 1em;
+  font-size: var(--font-base);
   color: var(--color-dark);
   line-height: 1;
   transition: color 0.4s ease 1.1s;
@@ -695,7 +706,7 @@ aside li {
 
 .header-locations {
   position: relative;
-  font-size: 0.75em;
+  font-size: var(--font-xs);
   line-height: 1.4;
   color: var(--color-dark);
   transition: color 0.4s ease 1.1s;
@@ -727,6 +738,26 @@ aside li {
   align-items: center;
   flex: 1;
   justify-content: flex-end;
+  gap: 1.5em;
+}
+
+.header-search {
+  color: var(--color-dark);
+  text-decoration: none;
+  font-family: inherit;
+  font-size: var(--font-sm);
+  line-height: 1;
+  transition: color 0.4s ease 1.1s;
+}
+
+.header-search:hover {
+  text-decoration: none;
+}
+
+.header-bag-count {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: var(--font-sm);
+  line-height: inherit;
 }
 
 .header-bag {
@@ -735,7 +766,7 @@ aside li {
   cursor: pointer;
   padding: 0;
   font-family: inherit;
-  font-size: 0.875em;
+  font-size: var(--font-sm);
   transition: color 0.4s ease 1.1s;
   line-height: 1;
   color: var(--color-dark);
@@ -937,7 +968,7 @@ aside li {
 }
 
 .hero-copy-text {
-  font-size: 1em;
+  font-size: var(--font-base);
   line-height: 1.6;
   color: var(--color-dark);
 }
@@ -952,7 +983,7 @@ aside li {
   justify-content: space-between;
   align-items: center;
   padding: 0.5em 0;
-  font-size: 0.8125em;
+  font-size: var(--font-sm);
   color: var(--color-dark);
 }
 
@@ -989,7 +1020,7 @@ aside li {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12em 1.5em;
+  padding: 20em 1.5em;
   overflow: hidden;
 }
 
@@ -1012,7 +1043,7 @@ aside li {
 
 .about-section-text {
   font-family: var(--font-display);
-  font-size: 1.5em;
+  font-size: var(--font-xl);
   line-height: 1.4;
   text-align: center;
   max-width: 32em;
@@ -1036,7 +1067,7 @@ aside li {
 .products-title-left,
 .products-title-right {
   font-family: var(--font-display);
-  font-size: 3.5em;
+  font-size: var(--font-3xl);
   font-weight: 400;
   line-height: 1;
   margin: 0;
@@ -1059,7 +1090,7 @@ aside li {
 }
 
 .products-count {
-  font-size: 0.875em;
+  font-size: var(--font-sm);
   color: var(--color-dark);
 }
 
@@ -1067,7 +1098,7 @@ aside li {
   display: flex;
   align-items: center;
   gap: 1.5em;
-  font-size: 0.875em;
+  font-size: var(--font-sm);
   color: var(--color-dark);
 }
 
@@ -1104,7 +1135,7 @@ aside li {
 }
 
 .product-card-name {
-  font-size: 0.75em;
+  font-size: var(--font-xs);
   color: var(--color-dark);
   opacity: 0.6;
   margin-bottom: 0.5em;
@@ -1150,14 +1181,14 @@ aside li {
 }
 
 .product-card-description {
-  font-size: 0.8125em;
+  font-size: var(--font-sm);
   color: var(--color-dark);
   margin: 0;
   line-height: 1.4;
 }
 
 .product-card-variants {
-  font-size: 0.75em;
+  font-size: var(--font-xs);
   color: var(--color-dark);
   opacity: 0.6;
   margin: 0;
@@ -1198,7 +1229,7 @@ aside li {
 
   .products-title-left,
   .products-title-right {
-    font-size: 2em;
+    font-size: var(--font-2xl);
   }
 
   .products-filters {
@@ -1287,7 +1318,7 @@ aside li {
 .product-options-item:disabled {
   padding: 0.25em 0.5em;
   background-color: transparent;
-  font-size: 1em;
+  font-size: var(--font-base);
   font-family: inherit;
 }
 
@@ -1377,7 +1408,7 @@ aside li {
   padding: 0.5em;
   border: 1px solid #d1d5db;
   border-radius: 0.25em;
-  font-size: 1em;
+  font-size: var(--font-base);
 }
 
 .order-search-buttons {
