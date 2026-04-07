@@ -1130,7 +1130,7 @@ span.menu-panel-bottom-link {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5em;
 }
 
@@ -1268,7 +1268,7 @@ span.menu-panel-bottom-link {
 .products-grid {
   display: grid;
   grid-gap: 1.5em;
-  grid-template-columns: repeat(auto-fit, minmax(var(--grid-item-width), 1fr));
+  grid-template-columns: repeat(4, 1fr);
   margin-bottom: 2em;
 }
 
