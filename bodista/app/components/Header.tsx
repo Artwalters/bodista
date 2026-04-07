@@ -44,6 +44,7 @@ export function Header({
 
     const masks = locations.querySelectorAll('.header-location-mask')
     const spans = Array.from(masks).map((m) => m.querySelector('span'))
+    const marker = document.querySelector('.header-locations-marker')
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({paused: true})
@@ -55,10 +56,17 @@ export function Header({
         ease: 'expo.in',
       })
 
-      tl.to(logo, {
-        autoAlpha: 0,
-        duration: 0.4,
-      })
+      if (marker) {
+        tl.to(
+          marker,
+          {
+            autoAlpha: 0,
+            duration: 0.4,
+            ease: 'expo.in',
+          },
+          '<',
+        )
+      }
 
       tlRef.current = tl
 
@@ -99,23 +107,26 @@ export function Header({
     <div className="header-wrapper" data-menu-open={isMenuOpen || undefined}>
       <header className="header">
         <div className="header-left">
-          <MenuToggle />
-        </div>
-        <div className="header-center">
           <span ref={logoRef}>
             <NavLink prefetch="intent" to="/" className="header-logo-text">
-              a
+              bodista
             </NavLink>
           </span>
+        </div>
+        <div className="header-center">
+          <span className="header-locations-marker">§</span>
           <div className="header-locations" ref={locationsRef}>
             <div className="header-location-mask">
-              <span>london</span>
+              <span>oils</span>
             </div>
             <div className="header-location-mask">
-              <span>newyork</span>
+              <span>serums</span>
             </div>
             <div className="header-location-mask">
-              <span>ibiza</span>
+              <span>mist</span>
+            </div>
+            <div className="header-location-mask">
+              <span>fragrances</span>
             </div>
           </div>
         </div>
@@ -127,6 +138,7 @@ export function Header({
             profile
           </NavLink>
           <CartToggle cart={cart} />
+          <MenuToggle />
         </div>
       </header>
     </div>
