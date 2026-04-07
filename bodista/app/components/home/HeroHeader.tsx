@@ -13,6 +13,8 @@ export function HeroHeader() {
           className="hero-emboss"
           alignBottom
           bottomOffset={0.04}
+          highlightStrength={0.25}
+          shadowStrength={0.85}
         />
         <div className="hero-copy">
           <p className="hero-copy-text">
