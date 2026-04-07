@@ -256,14 +256,23 @@ code {
   background: Highlight;
 }
 
-.grain-overlay {
-  position: fixed;
-  inset: 0;
+body::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 9999;
   pointer-events: none;
-  background: url('/assets/grain.jpg') repeat;
-  background-size: 200px 200px;
-  opacity: 0.15;
+  background: url('/assets/logos/plaster.png') repeat;
+  background-size: 60em 60em;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+
+body {
+  position: relative;
 }
 
 /* ==========================================================================
