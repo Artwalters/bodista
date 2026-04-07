@@ -90,7 +90,7 @@ void main() {
   float angle = 2.35;
 
   /* Mouse shifts shadows — like light source moving */
-  vec2 mouseShift = uMouse * 0.04;
+  vec2 mouseShift = uMouse * 0.15;
 
   /* Just a few broad, soft diagonal streaks */
   float L1 = leafNoise(st * 0.8 + mouseShift, 6.0, angle, sway1);
@@ -187,8 +187,8 @@ export function ShadowOverlay() {
       if (!isVisibleRef.current) return
 
       /* Smooth mouse — same easing as emboss (0.015) */
-      smoothMouseRef.current.x += (mousePosRef.current.x - smoothMouseRef.current.x) * 0.005
-      smoothMouseRef.current.y += (mousePosRef.current.y - smoothMouseRef.current.y) * 0.005
+      smoothMouseRef.current.x += (mousePosRef.current.x - smoothMouseRef.current.x) * 0.02
+      smoothMouseRef.current.y += (mousePosRef.current.y - smoothMouseRef.current.y) * 0.02
       uniformsRef.current.uMouse.value.set(smoothMouseRef.current.x, smoothMouseRef.current.y)
 
       uniformsRef.current.uTime.value = (performance.now() - startTime) / 1000

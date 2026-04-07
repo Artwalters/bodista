@@ -287,6 +287,12 @@ export function WebGLTextProvider() {
         ScrollTrigger.getAll().forEach((st) => {
           if (texts.some((t) => t.element === st.trigger)) st.kill()
         })
+        texts.forEach((t) => {
+          scene.remove(t.mesh)
+          t.mesh.dispose?.()
+          t.material.dispose?.()
+        })
+        renderer.dispose()
       }
     }
 
