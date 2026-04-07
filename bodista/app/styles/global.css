@@ -511,7 +511,7 @@ aside li {
   color: var(--color-light);
   text-decoration: none;
   font-family: var(--font-display);
-  font-size: var(--font-md);
+  font-size: var(--font-sm);
   line-height: 1.6;
 }
 
