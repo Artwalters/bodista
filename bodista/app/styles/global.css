@@ -517,15 +517,14 @@ aside li {
 }
 
 .menu-panel-links a:hover {
-  opacity: 0.8;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .menu-panel-bottom-link {
   margin-top: auto;
   padding-top: 1em;
   font-size: var(--font-sm);
-  color: var(--color-light);
-  opacity: 0.8;
+  color: rgba(255, 255, 255, 0.8);
   display: inline-flex;
   align-items: center;
   padding-bottom: 0.3em;
@@ -534,7 +533,7 @@ aside li {
 }
 
 .menu-panel-bottom-link:hover {
-  opacity: 1;
+  color: rgba(255, 255, 255, 1);
 }
 
 span.menu-panel-bottom-link {
@@ -1220,10 +1219,15 @@ span.menu-panel-bottom-link {
   opacity: 0.6;
 }
 
+.product-card-info button:hover .product-card-add-icon {
+  transform: rotate(90deg);
+}
+
 .product-card-add-icon {
   width: 1.8em;
   height: 1.8em;
   color: var(--color-dark);
+  transition: transform 0.6s cubic-bezier(0.7, 0, 0.84, 0);
 }
 
 /* ==========================================================================
