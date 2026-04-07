@@ -536,6 +536,11 @@ aside li {
   opacity: 1;
 }
 
+span.menu-panel-bottom-link {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .menu-panel-arrow {
   width: 1.2em;
   height: 1.2em;

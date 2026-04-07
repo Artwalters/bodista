@@ -67,7 +67,9 @@ export function ProductHighlights({
       </div>
       <hr className="products-divider" />
       <div className="products-toolbar">
-        <span className="products-count">all products ({products.length})</span>
+        <span className="products-count">
+          all products (<span className="header-bag-count">{products.length}</span>)
+        </span>
         <div className="products-filters">
           <span>oils</span>
           <span>serums</span>
