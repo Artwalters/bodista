@@ -126,9 +126,10 @@ a {
 }
 
 hr {
-  border-top: 1px solid var(--color-dark);
-  border-bottom: none;
+  border: none;
+  border-top: 2px groove color-mix(in srgb, var(--color-dark) 20%, transparent);
   margin: 0;
+  height: 0;
 }
 
 ul {
@@ -462,8 +463,8 @@ aside li {
   left: 0;
   right: 0;
   top: var(--site-header-height);
-  height: 1px;
-  background: rgba(255, 255, 255, 0.2);
+  height: 0;
+  border-top: 2px groove rgba(255, 255, 255, 0.2);
 }
 
 .menu-panel-inner {
@@ -478,7 +479,7 @@ aside li {
   display: flex;
   flex-direction: column;
   padding: 0 1.5em;
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 2px groove rgba(255, 255, 255, 0.2);
   margin-top: -1em;
   padding-top: 1em;
   margin-bottom: -1.5em;
@@ -528,7 +529,7 @@ aside li {
   display: inline-flex;
   align-items: center;
   padding-bottom: 0.3em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 2px groove rgba(255, 255, 255, 0.2);
   align-self: flex-start;
 }
 
@@ -979,8 +980,10 @@ span.menu-panel-bottom-link {
 }
 
 .hero-copy-link hr {
-  border-top: 1px solid color-mix(in srgb, var(--color-dark) 20%, transparent);
+  border: none;
+  border-top: 2px groove color-mix(in srgb, var(--color-dark) 20%, transparent);
   margin: 0;
+  height: 0;
 }
 
 .hero-copy-link-inner {
@@ -1081,8 +1084,9 @@ span.menu-panel-bottom-link {
 
 .products-divider {
   border: none;
-  border-top: 1px solid color-mix(in srgb, var(--color-dark) 15%, transparent);
+  border-top: 2px groove color-mix(in srgb, var(--color-dark) 20%, transparent);
   margin: 0.5em 0 0;
+  height: 0;
 }
 
 .products-toolbar {
@@ -1091,7 +1095,7 @@ span.menu-panel-bottom-link {
   align-items: center;
   padding: 0.75em 0;
   margin-bottom: 2em;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-dark) 15%, transparent);
+  border-bottom: 2px groove color-mix(in srgb, var(--color-dark) 20%, transparent);
 }
 
 .products-count {
@@ -1175,8 +1179,8 @@ span.menu-panel-bottom-link {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid color-mix(in srgb, var(--color-dark) 20%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-dark) 20%, transparent);
+  border-top: 2px groove color-mix(in srgb, var(--color-dark) 20%, transparent);
+  border-bottom: 2px groove color-mix(in srgb, var(--color-dark) 20%, transparent);
   padding: 0.5em 0;
 }
 
@@ -1497,7 +1501,7 @@ body.slot-active {
 }
 
 .slot-newsletter:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .slot-socials {
@@ -1518,5 +1522,13 @@ body.slot-active {
 }
 
 .slot-socials a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+}
+
+
+.testgold-logo {
+  position: relative;
+  width: 60vw;
+  max-width: 60em;
+  aspect-ratio: 4 / 1;
 }

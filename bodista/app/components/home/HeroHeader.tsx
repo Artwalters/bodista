@@ -33,7 +33,7 @@ export function HeroHeader() {
         </div>
       </div>
       <div className="hero-image">
-        <img src="/images/hero test.jpg" alt="" />
+        <img src="/images/hero1.png" alt="" />
       </div>
     </section>
   )

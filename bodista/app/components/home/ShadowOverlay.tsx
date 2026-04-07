@@ -90,7 +90,7 @@ void main() {
   float angle = 2.35;
 
   /* Mouse shifts shadows — like light source moving */
-  vec2 mouseShift = uMouse * 0.15;
+  vec2 mouseShift = uMouse * 0.06;
 
   /* Just a few broad, soft diagonal streaks */
   float L1 = leafNoise(st * 0.8 + mouseShift, 6.0, angle, sway1);
