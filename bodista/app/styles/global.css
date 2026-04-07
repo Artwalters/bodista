@@ -1421,3 +1421,102 @@ span.menu-panel-bottom-link {
   gap: 0.75em;
   flex-wrap: wrap;
 }
+
+/* ==========================================================================
+   Slot page
+   ========================================================================== */
+
+body.slot-active .site-header-fixed,
+body.slot-active .menu-panel-wrapper,
+body.slot-active .site-footer,
+body.slot-active footer {
+  display: none !important;
+}
+
+body.slot-active .main-content {
+  padding: 0 !important;
+  will-change: auto !important;
+  transform: none !important;
+  background: transparent !important;
+}
+
+body.slot-active > main,
+body.slot-active main {
+  margin: 0 !important;
+}
+
+body.slot-active {
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.slot-page {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  color: var(--color-dark);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.slot-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/assets/logos/white-recycle-paper-texture.jpg') repeat;
+  background-size: 20em 20em;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.slot-emboss,
+.slot-newsletter,
+.slot-socials {
+  z-index: 2;
+}
+
+.slot-emboss {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%;
+  height: 20vw;
+  max-width: 600px;
+}
+
+.slot-newsletter {
+  position: absolute;
+  bottom: 1.5em;
+  left: 1.5em;
+  font-size: var(--font-sm);
+  color: var(--color-dark);
+  text-decoration: none;
+}
+
+.slot-newsletter:hover {
+  text-decoration: underline;
+}
+
+.slot-socials {
+  position: absolute;
+  bottom: 1.5em;
+  right: 1.5em;
+  display: flex;
+  gap: 1.5em;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-sm);
+}
+
+.slot-socials a {
+  color: var(--color-dark);
+  text-decoration: none;
+}
+
+.slot-socials a:hover {
+  text-decoration: underline;
+}
