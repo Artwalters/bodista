@@ -92,33 +92,47 @@ void main() {
   /* Mouse shifts shadows — like light source moving */
   vec2 mouseShift = uMouse * 0.06;
 
-  /* Just a few broad, soft diagonal streaks */
+  /* Broad diagonal streaks with subtle detail layer */
   float L1 = leafNoise(st * 0.8 + mouseShift, 6.0, angle, sway1);
-  float L2 = leafNoise(st * 0.8 + vec2(5.0, 3.0) + mouseShift * 0.7, 5.0, angle + 0.15, sway2);
+  float L2 = leafNoise(st * 0.85 + vec2(5.0, 3.0) + mouseShift * 0.7, 5.0, angle + 0.18, sway2);
+  float L3 = leafNoise(st * 1.6 + vec2(2.0, 7.0) + mouseShift * 0.5, 4.0, angle - 0.12, sway1 * 1.2);
 
-  /* Combine into soft bands with wide gaps */
-  float shadow = L1 * 0.6 + L2 * 0.4;
+  /* Combine into soft bands with wide gaps, detail breaks up straight lines */
+  float shadow = L1 * 0.5 + L2 * 0.35 + L3 * 0.15;
   shadow = shadow * 0.5 + 0.5;
   shadow = smoothstep(0.45, 0.75, shadow);
 
-  /* Fade: strong top-left, gentler fade toward bottom-right */
-  float diagFade = 1.0 - smoothstep(0.2, 1.2, (uv.x * 0.3 + uv.y * 0.7));
+  /* Fade: strongest at top-left, much weaker toward right and bottom-right */
+  float diagCoord = (1.0 - uv.x) * 0.55 + uv.y * 0.45;
+  float diagFade = mix(0.1, 1.0, smoothstep(0.0, 0.9, diagCoord));
   shadow *= diagFade;
 
   /* Light leaks — slow moving warm spots with detail */
   float leak1 = snoise(st * 0.4 + vec2(t * 0.05, t * 0.03));
   float leak2 = snoise(st * 0.6 + vec2(-t * 0.04, t * 0.06) + vec2(10.0, 5.0));
   float leak3 = snoise(st * 1.2 + vec2(t * 0.03, -t * 0.05) + vec2(3.0, 8.0));
-  float leaks = smoothstep(0.2, 0.7, leak1) * 0.45 + smoothstep(0.3, 0.8, leak2) * 0.35 + smoothstep(0.15, 0.65, leak3) * 0.2;
+  /* Thin bright rays — high-frequency streaks in the light direction */
+  float ray1 = leafNoise(st * 1.2 + vec2(t * 0.04, 0.0), 9.0, angle, sway1 * 0.6);
+  float ray2 = leafNoise(st * 1.5 + vec2(-t * 0.03, 4.0), 11.0, angle - 0.1, sway2 * 0.6);
+
+  float leaks = smoothstep(0.2, 0.7, leak1) * 0.5
+              + smoothstep(0.3, 0.8, leak2) * 0.4
+              + smoothstep(0.15, 0.65, leak3) * 0.25;
   leaks *= (1.0 - shadow) * diagFade;
 
+  float rays = smoothstep(0.55, 0.85, ray1 * 0.5 + 0.5) * 0.6
+             + smoothstep(0.6, 0.9, ray2 * 0.5 + 0.5) * 0.4;
+  rays *= (1.0 - shadow) * diagFade;
+
   /* Mix between warm sunlight and soft shadow */
-  vec3 warmLight = vec3(0.95, 0.75, 0.4);
-  vec3 leakColor = vec3(1.0, 0.82, 0.45);
+  vec3 warmLight = vec3(1.0, 0.78, 0.42);
+  vec3 leakColor = vec3(1.0, 0.85, 0.5);
+  vec3 rayColor = vec3(1.0, 0.95, 0.85);
   vec3 coolShadow = vec3(0.15, 0.1, 0.05);
   vec3 color = mix(warmLight, coolShadow, shadow);
-  color += leakColor * leaks * 0.5;
-  float alpha = mix(0.06, 0.12, shadow) + leaks * 0.2;
+  color += leakColor * leaks * 0.28;
+  color += rayColor * rays * 0.38;
+  float alpha = mix(0.03, 0.05, shadow) + leaks * 0.09 + rays * 0.035;
 
   /* Soft fade-out near the bottom edge to blend into background */
   float bottomFade = smoothstep(0.0, 0.35, uv.y);

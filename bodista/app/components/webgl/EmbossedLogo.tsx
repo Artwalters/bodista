@@ -173,7 +173,7 @@ export function EmbossedLogo({
           uNormalMap: {value: normalMap},
           uLightDir: {value: new THREE.Vector2(-0.6, 0.6)},
           uLightAltitude: {value: 0.45},
-          uDepth: {value: 2.0},
+          uDepth: {value: 1.5},
           uHighlightStrength: {value: highlightStrength},
           uShadowStrength: {value: shadowStrength},
           uSpecularPower: {value: 50.0},
@@ -225,9 +225,13 @@ export function EmbossedLogo({
         smoothMouse.x += (mousePos.x - smoothMouse.x) * 0.03
         smoothMouse.y += (mousePos.y - smoothMouse.y) * 0.03
 
-        const baseX = -0.6 + smoothMouse.x * 0.2
-        const baseY = 0.6 + smoothMouse.y * 0.2
-        material.uniforms.uLightDir.value.set(baseX, baseY)
+        // Light always stays in the top-left quadrant — drift is tiny
+        const baseX = -0.6 + smoothMouse.x * 0.08
+        const baseY = 0.6 + smoothMouse.y * 0.08
+        material.uniforms.uLightDir.value.set(
+          Math.min(baseX, -0.4),
+          Math.max(baseY, 0.4),
+        )
 
         renderer.render(scene, camera)
       }
