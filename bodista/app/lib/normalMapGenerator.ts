@@ -234,21 +234,23 @@ export const generateImageEmboss = (
   // Draw in white using compositing
   ctx.drawImage(img, drawX, drawY, drawW, drawH)
 
-  // The SVG has white fills, so the image is already white on black
-  // But if the SVG had other colors, force everything non-black to white
+  // Keep anti-aliased grayscale — used for sub-pixel edge correction in SDF
   const imgData = ctx.getImageData(0, 0, width, height)
   const px = imgData.data
-  for (let i = 0; i < px.length; i += 4) {
-    const lum = px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114
-    const val = lum > 30 ? 255 : 0
-    px[i] = val
-    px[i + 1] = val
-    px[i + 2] = val
-    px[i + 3] = 255
+  const coverage = new Float32Array(width * height)
+  for (let i = 0; i < width * height; i++) {
+    const p = i * 4
+    const lum = (px[p] * 0.299 + px[p + 1] * 0.587 + px[p + 2] * 0.114) / 255
+    coverage[i] = lum
+    const val = lum > 0.5 ? 255 : 0
+    px[p] = val
+    px[p + 1] = val
+    px[p + 2] = val
+    px[p + 3] = 255
   }
   ctx.putImageData(imgData, 0, 0)
 
-  return embossFromCanvas(canvas, width, height, bevelWidth, depth, strength)
+  return embossFromCanvas(canvas, width, height, bevelWidth, depth, strength, coverage)
 }
 
 /**
@@ -261,6 +263,7 @@ const embossFromCanvas = (
   bevelWidth: number,
   depth: number,
   strength: number,
+  coverage?: Float32Array,
 ): { normalMap: THREE.CanvasTexture, heightMap: THREE.CanvasTexture } => {
   const ctx = canvas.getContext('2d')!
 
@@ -280,9 +283,12 @@ const embossFromCanvas = (
   const distOutside = edt(invertedMask, width, height)
 
   // Signed distance field: negative inside, positive outside
+  // Sub-pixel correction: use anti-aliased coverage to offset edges (0.5 = on edge)
   const sdf = new Float32Array(width * height)
   for (let i = 0; i < width * height; i++) {
-    sdf[i] = distOutside[i] - distInside[i]
+    let d = distOutside[i] - distInside[i]
+    if (coverage) d += 0.5 - coverage[i]
+    sdf[i] = d
   }
 
   // Step 2: Apply bevel profile curve to create height map
@@ -301,7 +307,7 @@ const embossFromCanvas = (
   }
 
   // Step 2b: Smooth the height map to remove aliasing artifacts
-  heightMapData = gaussianBlur(heightMapData, width, height, 6)
+  heightMapData = gaussianBlur(heightMapData, width, height, 2)
 
   // Step 3: Compute normals from height map via Sobel
   const normalCanvas = document.createElement('canvas')

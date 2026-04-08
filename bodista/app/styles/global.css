@@ -267,20 +267,7 @@ code {
   background: Highlight;
 }
 
-body::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  pointer-events: none;
-  background: url('/assets/logos/white-recycle-paper-texture.jpg') repeat;
-  background-size: 20em 20em;
-  mix-blend-mode: multiply;
-  opacity: 0.5;
-}
+/* Paper overlay is rendered via WebGL in <PaperOverlay /> */
 
 body {
   position: relative;
@@ -1482,17 +1469,7 @@ body.slot-active {
   z-index: 10;
 }
 
-.slot-page::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url('/assets/logos/white-recycle-paper-texture.jpg') repeat;
-  background-size: 20em 20em;
-  mix-blend-mode: multiply;
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: 1;
-}
+/* Slot paper overlay handled globally by <PaperOverlay /> */
 
 .slot-emboss,
 .slot-newsletter,

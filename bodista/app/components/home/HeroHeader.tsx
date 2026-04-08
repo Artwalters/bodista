@@ -11,8 +11,9 @@ export function HeroHeader() {
       <div className="hero-top">
         <EmbossedLogo
           className="hero-emboss"
+          normalMapSrc="/assets/logos/bodistanormal3.png"
           alignBottom
-          bottomOffset={0.04}
+          bottomOffset={0}
           highlightStrength={0.25}
           shadowStrength={0.85}
         />

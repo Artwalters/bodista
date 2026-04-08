@@ -17,6 +17,7 @@ import globalStyles from '~/styles/global.css?url';
 import {PageLayout} from './components/PageLayout';
 import {SmoothScroll} from './components/SmoothScroll';
 import {WebGLTextProvider} from './components/webgl/WebGLTextProvider';
+import {PaperOverlay} from './components/webgl/PaperOverlay';
 
 export type RootLoader = typeof loader;
 
@@ -157,6 +158,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <body>
         <SmoothScroll />
         <WebGLTextProvider />
+        <PaperOverlay />
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

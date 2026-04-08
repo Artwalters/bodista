@@ -53,6 +53,8 @@ void main() {
 
 export interface EmbossedLogoProps {
   src?: string
+  /** Pre-baked normal map PNG. When set, skips runtime generation. */
+  normalMapSrc?: string
   className?: string
   /** Fraction of min(width,height) to pad around the logo inside the texture. */
   padding?: number
@@ -69,6 +71,7 @@ export interface EmbossedLogoProps {
 
 export function EmbossedLogo({
   src = '/assets/logos/bodista_logo.svg',
+  normalMapSrc,
   className,
   padding = 0,
   alignBottom = false,
@@ -95,12 +98,12 @@ export function EmbossedLogo({
       await document.fonts.ready
 
       const THREE = await import('three')
-      const {generateImageEmboss} = await import('~/lib/normalMapGenerator')
 
       if (cancelled) return
 
       const logo = new Image()
-      logo.src = src
+      logo.crossOrigin = 'anonymous'
+      logo.src = normalMapSrc ?? src
       await new Promise<void>((resolve, reject) => {
         logo.onload = () => resolve()
         logo.onerror = () => reject(new Error('Failed to load logo'))
@@ -131,19 +134,36 @@ export function EmbossedLogo({
 
       const scene = new THREE.Scene()
 
-      const dpr = Math.min(window.devicePixelRatio, 2)
-      const texW = Math.round(bounds.width * dpr)
-      const texH = Math.round(bounds.height * dpr)
-      const {normalMap, heightMap} = generateImageEmboss(logo, {
-        width: texW,
-        height: texH,
-        bevelWidth: Math.max(1, Math.round(Math.min(texW, texH) * bevelWidth)),
-        depth,
-        strength,
-        padding: Math.round(Math.min(texW, texH) * padding),
-        bottomOffset: Math.round(texH * bottomOffset),
-        alignBottom,
-      })
+      let normalMap: THREE.Texture
+      let heightMap: THREE.Texture | null = null
+
+      if (normalMapSrc) {
+        const tex = new THREE.CanvasTexture(logo)
+        tex.colorSpace = THREE.NoColorSpace
+        tex.minFilter = THREE.LinearMipmapLinearFilter
+        tex.magFilter = THREE.LinearFilter
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
+        tex.needsUpdate = true
+        normalMap = tex
+      } else {
+        const {generateImageEmboss} = await import('~/lib/normalMapGenerator')
+        const dpr = Math.min(window.devicePixelRatio, 2)
+        const SUPERSAMPLE = 2
+        const texW = Math.round(bounds.width * dpr * SUPERSAMPLE)
+        const texH = Math.round(bounds.height * dpr * SUPERSAMPLE)
+        const res = generateImageEmboss(logo, {
+          width: texW,
+          height: texH,
+          bevelWidth: Math.max(1, Math.round(Math.min(texW, texH) * bevelWidth)),
+          depth,
+          strength,
+          padding: Math.round(Math.min(texW, texH) * padding),
+          bottomOffset: Math.round(texH * bottomOffset),
+          alignBottom,
+        })
+        normalMap = res.normalMap
+        heightMap = res.heightMap
+      }
 
       const material = new THREE.ShaderMaterial({
         vertexShader: embossVertShader,
@@ -151,8 +171,8 @@ export function EmbossedLogo({
         transparent: true,
         uniforms: {
           uNormalMap: {value: normalMap},
-          uLightDir: {value: new THREE.Vector2(-0.4, 0.4)},
-          uLightAltitude: {value: 0.6},
+          uLightDir: {value: new THREE.Vector2(-0.6, 0.6)},
+          uLightAltitude: {value: 0.45},
           uDepth: {value: 2.0},
           uHighlightStrength: {value: highlightStrength},
           uShadowStrength: {value: shadowStrength},
@@ -162,7 +182,30 @@ export function EmbossedLogo({
 
       const geometry = new THREE.PlaneGeometry(1, 1)
       const mesh = new THREE.Mesh(geometry, material)
-      mesh.scale.set(bounds.width, bounds.height, 1)
+
+      const imgAspect = normalMapSrc
+        ? logo.naturalWidth / logo.naturalHeight
+        : null
+
+      const fitMesh = (w: number, h: number) => {
+        if (imgAspect) {
+          const boundsAspect = w / h
+          let mw: number, mh: number
+          if (imgAspect > boundsAspect) {
+            mw = w
+            mh = w / imgAspect
+          } else {
+            mh = h
+            mw = h * imgAspect
+          }
+          mesh.scale.set(mw, mh, 1)
+          const yOffset = alignBottom ? -(h - mh) / 2 - bottomOffset * h : 0
+          mesh.position.set(0, yOffset, 0)
+        } else {
+          mesh.scale.set(w, h, 1)
+        }
+      }
+      fitMesh(bounds.width, bounds.height)
       scene.add(mesh)
 
       const mousePos = {x: 0, y: 0}
@@ -178,11 +221,12 @@ export function EmbossedLogo({
         if (cancelled) return
         animationId = requestAnimationFrame(render)
 
-        smoothMouse.x += (mousePos.x - smoothMouse.x) * 0.015
-        smoothMouse.y += (mousePos.y - smoothMouse.y) * 0.015
+        // Match PaperOverlay smoothing for consistent subtle drift
+        smoothMouse.x += (mousePos.x - smoothMouse.x) * 0.03
+        smoothMouse.y += (mousePos.y - smoothMouse.y) * 0.03
 
-        const baseX = -0.4 + smoothMouse.x * 0.35
-        const baseY = 0.4 + smoothMouse.y * 0.35
+        const baseX = -0.6 + smoothMouse.x * 0.2
+        const baseY = 0.6 + smoothMouse.y * 0.2
         material.uniforms.uLightDir.value.set(baseX, baseY)
 
         renderer.render(scene, camera)
@@ -197,7 +241,7 @@ export function EmbossedLogo({
         const newFov = 2 * Math.atan(nb.height / 2 / DIST) * (180 / Math.PI)
         camera.fov = newFov
         camera.updateProjectionMatrix()
-        mesh.scale.set(nb.width, nb.height, 1)
+        fitMesh(nb.width, nb.height)
       }
       window.addEventListener('resize', onResize)
 
@@ -205,7 +249,7 @@ export function EmbossedLogo({
         geometry.dispose()
         material.dispose()
         normalMap.dispose()
-        heightMap.dispose()
+        if (heightMap) heightMap.dispose()
         renderer.dispose()
         if (canvas.parentNode === el) el.removeChild(canvas)
       }
@@ -222,6 +266,7 @@ export function EmbossedLogo({
     }
   }, [
     src,
+    normalMapSrc,
     padding,
     alignBottom,
     bottomOffset,
