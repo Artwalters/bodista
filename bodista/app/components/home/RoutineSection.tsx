@@ -17,7 +17,10 @@ const Arrow = () => (
 
 const StepButton = ({num}: {num: string}) => (
   <button type="button" className="routine-step" aria-label={`Step ${num}`}>
-    <GoldCircle />
+    <span className="routine-step-ring" aria-hidden="true" />
+    <span className="routine-step-icon">
+      <GoldCircle mask="/assets/icons/noun-abstract-face-3819874.svg" />
+    </span>
     <span className="routine-step-label">{num}</span>
   </button>
 )

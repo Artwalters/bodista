@@ -4,6 +4,7 @@ import {Suspense} from 'react';
 import {HeroHeader} from '~/components/home/HeroHeader';
 import {AboutSection} from '~/components/home/AboutSection';
 import {RoutineSection} from '~/components/home/RoutineSection';
+import {ReviewSection} from '~/components/home/ReviewSection';
 import {ProductHighlights} from '~/components/home/ProductHighlights';
 
 export const meta: Route.MetaFunction = () => {
@@ -54,6 +55,7 @@ export default function Homepage() {
         </Await>
       </Suspense>
       <RoutineSection />
+      <ReviewSection />
     </div>
   );
 }
