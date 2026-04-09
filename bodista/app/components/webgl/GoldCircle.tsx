@@ -18,6 +18,7 @@ export function GoldCircle({mask, text}: GoldCircleProps = {}) {
     let cancelled = false
     let raf = 0
     let cleanup: (() => void) | null = null
+    let started = false
 
     const init = async () => {
       const THREE = await import('three')
@@ -247,10 +248,21 @@ export function GoldCircle({mask, text}: GoldCircleProps = {}) {
       }
     }
 
-    init()
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started) {
+          started = true
+          init()
+          io.disconnect()
+        }
+      },
+      {rootMargin: '200px'},
+    )
+    io.observe(canvas)
 
     return () => {
       cancelled = true
+      io.disconnect()
       if (raf) cancelAnimationFrame(raf)
       if (cleanup) cleanup()
     }

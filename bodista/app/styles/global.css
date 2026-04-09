@@ -164,7 +164,7 @@ body > main {
 }
 
 h1 {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-xl);
   font-weight: 400;
   line-height: 1.4;
@@ -173,7 +173,7 @@ h1 {
 }
 
 h2 {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-lg);
   font-weight: 400;
   line-height: 1.4;
@@ -240,7 +240,7 @@ input {
 }
 
 legend {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   margin-bottom: 0.5em;
 }
 
@@ -500,7 +500,7 @@ aside li {
 .menu-panel-links a {
   color: var(--color-light);
   text-decoration: none;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-sm);
   line-height: 1.6;
 }
@@ -568,7 +568,7 @@ span.menu-panel-bottom-link {
 }
 
 .menu-panel-featured-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-xl);
   line-height: 1.3;
   text-transform: uppercase;
@@ -692,7 +692,7 @@ button.header-menu-toggle {
 }
 
 .header-logo-text {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-xl);
   color: var(--color-dark);
   line-height: 1;
@@ -708,7 +708,7 @@ button.header-menu-toggle {
 }
 
 .header-locations-marker {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-xs);
   color: color-mix(in srgb, var(--color-dark) 35%, transparent);
   line-height: 1;
@@ -764,7 +764,7 @@ button.header-menu-toggle {
 }
 
 .header-bag-count {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: var(--font-sm);
   line-height: inherit;
 }
@@ -1077,7 +1077,7 @@ button.header-menu-toggle {
 
 .products-title-left,
 .products-title-right {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-3xl);
   font-weight: 400;
   line-height: 1;
@@ -1397,7 +1397,7 @@ button.header-menu-toggle {
 }
 
 .order-search-legend {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   padding: 0 0.5em;
 }
 
@@ -1565,11 +1565,11 @@ body.slot-active {
 }
 
 .routine-header-icon {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
 }
 
 .routine-header-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 6em;
   font-weight: 400;
   line-height: 0.95;
@@ -1633,7 +1633,7 @@ body.slot-active {
 }
 
 .routine-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-3xl);
   font-weight: 400;
   line-height: 1;
@@ -1642,16 +1642,18 @@ body.slot-active {
 }
 
 .routine-subtitle {
-  font-family: var(--font-display);
-  font-style: italic;
+  font-family: var(--font-body);
   font-size: var(--font-base);
   margin: 0 0 0.5em;
   color: var(--color-dark);
 }
 
 .routine-body {
-  font-size: 1.25em;
+  font-family: var(--font-body);
+  font-size: var(--font-base);
   line-height: 1.5;
+  text-align: justify;
+  hyphens: auto;
   margin: 0 0 3.5em;
   color: var(--color-dark);
 }
@@ -1705,8 +1707,8 @@ body.slot-active {
   bottom: -0.05em;
   transform: translate(-50%, 50%);
   z-index: 2;
-  font-family: var(--font-display);
-  font-size: 1.1em;
+  font-family: var(--font-body);
+  font-size: var(--font-md);
   line-height: 1;
   padding: 0 0.45em;
   background: var(--color-bg);
@@ -1772,7 +1774,7 @@ body.slot-active {
 
 .routine-image-side-label {
   writing-mode: vertical-rl;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--font-xs);
   letter-spacing: 0.1em;
   color: color-mix(in srgb, var(--color-dark) 45%, transparent);
@@ -1821,24 +1823,23 @@ body.slot-active {
 }
 
 .review-name {
-  font-family: var(--font-display);
-  font-size: 1.05em;
+  font-family: var(--font-body);
+  font-size: var(--font-md);
   letter-spacing: 0.12em;
   margin: 0;
 }
 
 .review-role {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.85em;
+  font-family: var(--font-body);
+  font-size: var(--font-sm);
   opacity: 0.65;
   margin: 0.25em 0 0;
 }
 
 .review-quote {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.05em;
+  font-family: var(--font-body);
+  font-size: var(--font-base);
   line-height: 1.55;
   text-align: justify;
   hyphens: auto;
@@ -1851,7 +1852,7 @@ body.slot-active {
 .review-nav {
   display: flex;
   gap: 1em;
-  justify-self: end;
+  justify-self: stretch;
   padding-bottom: 0.5em;
 }
 
@@ -1867,6 +1868,10 @@ body.slot-active {
   align-items: center;
   justify-content: center;
   transition: background 0.25s ease, color 0.25s ease;
+}
+
+.review-audio-btn {
+  margin-right: auto;
 }
 
 .review-nav-arrow {
@@ -1955,14 +1960,15 @@ body.slot-active {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr auto;
-  align-items: start;
+  align-items: end;
   gap: 4em;
-  padding: 6em 1.5em;
+  padding: 9em 1.5em 7em;
   color: var(--color-dark);
 }
 
 .research-side-col {
   grid-column: 3;
+  align-self: start;
   display: flex;
   justify-content: flex-end;
   padding-right: 0.5em;
@@ -1976,7 +1982,7 @@ body.slot-active {
   flex-direction: column;
   gap: 0.5em;
   justify-self: start;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   grid-column: 1;
 }
 
@@ -1993,7 +1999,8 @@ body.slot-active {
 }
 
 .research-list-num {
-  font-size: 0.95em;
+  font-family: var(--font-body);
+  font-size: var(--font-base);
 }
 
 .research-list-btn {
@@ -2008,13 +2015,13 @@ body.slot-active {
 }
 
 .research-list-item.is-active .research-list-btn {
-  font-size: 1.05em;
+  font-size: var(--font-md);
 }
 
 .research-body {
   justify-self: stretch;
-  font-family: var(--font-display);
-  font-size: 1em;
+  font-family: var(--font-body);
+  font-size: var(--font-base);
   line-height: 1.6;
 }
 
@@ -2040,8 +2047,8 @@ body.slot-active {
   justify-content: space-between;
   color: var(--color-dark);
   text-decoration: none;
-  font-family: var(--font-display);
-  font-size: 1em;
+  font-family: var(--font-body);
+  font-size: var(--font-base);
 }
 
 .research-link-arrow {
@@ -2063,3 +2070,4 @@ body.slot-active {
     justify-self: stretch;
   }
 }
+

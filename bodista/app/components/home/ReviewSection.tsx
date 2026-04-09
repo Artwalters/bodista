@@ -14,7 +14,7 @@ const REVIEWS: Review[] = [
   {
     name: 'SOPHIA VERLAINE',
     role: 'friend of bodista',
-    avatar: '/images/review-sophia.jpg',
+    avatar: '/images/face-mist-sunlight.webp',
     image: '/images/hero1.png',
     quote:
       "It's like a symphony for my skin, blending dreamy scents with real results. My face feels nourished, and my senses are delighted. It's more than skincare; it's a self-care ritual I cherish!",
@@ -22,10 +22,10 @@ const REVIEWS: Review[] = [
   {
     name: 'ELENA MARCHETTI',
     role: 'friend of bodista',
-    avatar: '/images/review-elena.jpg',
+    avatar: '',
     image: '/images/review-arch-2.jpg',
     quote:
-      'Every ritual feels like a quiet pause in my day. The textures, the scents — it all reminds me to slow down and take care of myself.',
+      'Every ritual feels like a quiet pause in my day. The textures, the scents. It all reminds me to slow down and take care of myself.',
   },
 ]
 
@@ -37,6 +37,11 @@ const ArrowLeft = () => (
 const ArrowRight = () => (
   <span className="review-nav-arrow">
     <GoldCircle text="→" />
+  </span>
+)
+const AudioIcon = () => (
+  <span className="review-nav-arrow">
+    <GoldCircle mask="/assets/icons/audio (1).svg" />
   </span>
 )
 
@@ -52,9 +57,11 @@ export function ReviewSection() {
     <section className="review-section">
       <div className="review-left">
         <div className="review-person">
-          <div className="review-avatar">
-            <img src={review.avatar} alt="" />
-          </div>
+          {review.avatar ? (
+            <div className="review-avatar">
+              <img src={review.avatar} alt="" />
+            </div>
+          ) : null}
           <div className="review-person-meta">
             <p className="review-name">{review.name}</p>
             <p className="review-role">{review.role}</p>
@@ -73,6 +80,13 @@ export function ReviewSection() {
       </div>
 
       <div className="review-nav">
+        <button
+          type="button"
+          className="review-nav-btn review-audio-btn"
+          aria-label="Play audio"
+        >
+          <AudioIcon />
+        </button>
         <button
           type="button"
           className="review-nav-btn"

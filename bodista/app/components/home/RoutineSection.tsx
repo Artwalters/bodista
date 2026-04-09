@@ -93,23 +93,23 @@ export function RoutineSection() {
   return (
     <section className="routine-section">
       <RoutineBlock
-        title="body routine"
-        subtitle="Cleanse with intention"
-        body="Begin with a gentle botanical cleanser to remove the day. Pat your skin damp, not dry — moisture is the bridge between cleanser and oil."
-        image="/images/body-oil-dramatic.webp"
+        title="face routine"
+        subtitle="Nourish with ritual"
+        body="Warm a few drops between your palms and press into the skin. Breathe in the aromatic botanicals. The ritual is as much about scent as skin."
+        image="/images/face-mist-sunlight.webp"
         imageSideLabel="ROUTINE I"
         shopLabel="shop this routine"
-        readLabel="read about our body routine"
+        readLabel="read about our face routine"
       />
 
       <RoutineBlock
-        title="face routine"
-        subtitle="Nourish with ritual"
-        body="Warm a few drops between your palms and press into the skin. Breathe in the aromatic botanicals — the ritual is as much about scent as skin."
-        image="/images/face-mist-sunlight.webp"
+        title="body routine"
+        subtitle="Cleanse with intention"
+        body="Begin with a gentle botanical cleanser to remove the day. Pat your skin damp, not dry. Moisture is the bridge between cleanser and oil."
+        image="/images/body-oil-dramatic.webp"
         imageSideLabel="ROUTINE II"
         shopLabel="shop this routine"
-        readLabel="read about our face routine"
+        readLabel="read about our body routine"
         reverse
       />
     </section>
