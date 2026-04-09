@@ -10,9 +10,11 @@ node_modules
 .playwright-mcp
 
 # Dev screenshots & test images
-*.png
+/*.png
 header-new.png
 hero-em.png
 hero-v*.png
-image*.png
 text-demo-*.png
+
+# Allow all assets under public/
+!public/**
