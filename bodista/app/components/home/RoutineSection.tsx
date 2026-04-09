@@ -29,6 +29,7 @@ interface RoutineBlockProps {
   imageSideLabel: string
   shopLabel: string
   readLabel: string
+  reverse?: boolean
 }
 
 const RoutineBlock = ({
@@ -39,8 +40,12 @@ const RoutineBlock = ({
   imageSideLabel,
   shopLabel,
   readLabel,
+  reverse,
 }: RoutineBlockProps) => (
-  <div className="routine-block">
+  <div className={`routine-block${reverse ? ' routine-block-reverse' : ''}`}>
+    <div className="routine-side-col">
+      <span className="routine-image-side-label">{imageSideLabel}</span>
+    </div>
     <div className="routine-copy">
       <h3 className="routine-title">{title}</h3>
       <p className="routine-subtitle">{subtitle}</p>
@@ -71,30 +76,18 @@ const RoutineBlock = ({
         <img src={image} alt="" />
       </div>
     </div>
-    <div className="routine-side-col">
-      <span className="routine-image-side-label">{imageSideLabel}</span>
-    </div>
   </div>
 )
 
 export function RoutineSection() {
   return (
     <section className="routine-section">
-      <div className="routine-header">
-        <div className="routine-header-icons">
-          <span className="routine-header-icon">V. TACTILE</span>
-          <span className="routine-header-icon">III. OLFACTORY</span>
-        </div>
-        <h2 className="routine-header-title">ANCIENT RITUALS</h2>
-      </div>
-      <hr className="routine-divider" />
-
       <RoutineBlock
         title="body routine"
         subtitle="Cleanse with intention"
         body="Begin with a gentle botanical cleanser to remove the day. Pat your skin damp, not dry — moisture is the bridge between cleanser and oil."
         image="/images/body-oil-dramatic.webp"
-        imageSideLabel="III. OLFACTORY"
+        imageSideLabel="ROUTINE I"
         shopLabel="shop this routine"
         readLabel="read about our body routine"
       />
@@ -104,9 +97,10 @@ export function RoutineSection() {
         subtitle="Nourish with ritual"
         body="Warm a few drops between your palms and press into the skin. Breathe in the aromatic botanicals — the ritual is as much about scent as skin."
         image="/images/face-mist-sunlight.webp"
-        imageSideLabel="V. TACTILE"
+        imageSideLabel="ROUTINE II"
         shopLabel="shop this routine"
         readLabel="read about our face routine"
+        reverse
       />
     </section>
   )
