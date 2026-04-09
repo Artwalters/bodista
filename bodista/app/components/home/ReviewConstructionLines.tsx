@@ -18,13 +18,20 @@ export function ReviewConstructionLines() {
 
     const ctx = gsap.context(() => {
       gsap.set('.rc-draw', {drawSVG: '0%'})
-      if (arch) gsap.set(arch, {opacity: 0, filter: 'blur(24px)'})
+      if (arch) {
+        gsap.set(arch, {
+          opacity: 0,
+          filter: 'blur(24px)',
+          scale: 0.92,
+          transformOrigin: '50% 50%',
+        })
+      }
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: el,
           start: 'top bottom',
-          end: 'bottom center',
+          end: 'center center',
           scrub: 1,
         },
       })
@@ -42,8 +49,14 @@ export function ReviewConstructionLines() {
       if (arch) {
         tl.to(
           arch,
-          {opacity: 1, filter: 'blur(0px)', duration: 5, ease: 'power2.out'},
-          14,
+          {
+            opacity: 1,
+            filter: 'blur(0px)',
+            scale: 1,
+            duration: 5,
+            ease: 'power2.out',
+          },
+          11,
         )
       }
     }, el)
@@ -63,7 +76,7 @@ export function ReviewConstructionLines() {
   const common = {
     stroke: 'currentColor',
     fill: 'none',
-    strokeWidth: 1,
+    strokeWidth: 0.5,
     vectorEffect: 'non-scaling-stroke' as const,
   }
 

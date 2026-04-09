@@ -18,6 +18,7 @@ import {PageLayout} from './components/PageLayout';
 import {SmoothScroll} from './components/SmoothScroll';
 import {PlasterOverlay} from './components/webgl/PlasterOverlay';
 import {WebGLTextProvider} from './components/webgl/WebGLTextProvider';
+import {GoldCircleProvider} from './components/webgl/GoldCircleProvider';
 
 export type RootLoader = typeof loader;
 
@@ -159,6 +160,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <SmoothScroll />
         <WebGLTextProvider />
         <PlasterOverlay />
+        <GoldCircleProvider />
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

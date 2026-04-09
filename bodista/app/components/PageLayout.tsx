@@ -20,6 +20,7 @@ import {Header, HeaderMenu} from '~/components/Header'
 import {CartMain} from '~/components/CartMain'
 import {MenuPanel} from '~/components/MenuPanel'
 import {SiteFooter} from '~/components/SiteFooter'
+import {BehindTheScenesSection} from '~/components/home/BehindTheScenesSection'
 import {getLenisInstance} from '~/lib/lenis'
 import {
   SEARCH_ENDPOINT,
@@ -72,8 +73,11 @@ export function PageLayout({
 
     if (isMenuOpen) {
       isAnimatingRef.current = true
+      document.documentElement.dataset.menuOpen = 'true'
       // Capture scroll and stop Lenis
       scrollYRef.current = window.scrollY || 0
+      document.documentElement.dataset.frozenScroll = String(scrollYRef.current)
+      document.documentElement.dataset.menuShiftY = '0'
       if (lenis) lenis.stop()
 
       // Keep body height so it doesn't collapse when we go fixed
@@ -105,6 +109,11 @@ export function PageLayout({
         y: menuHeight,
         duration: 1.6,
         ease: 'osmo',
+        onUpdate: () => {
+          const y = gsap.getProperty(outer, 'y') as number
+          document.documentElement.dataset.menuShiftY = String(y)
+          document.documentElement.style.setProperty('--menu-shift', `${y}px`)
+        },
         onComplete: () => {
           isAnimatingRef.current = false
         },
@@ -116,6 +125,11 @@ export function PageLayout({
         y: 0,
         duration: 1.6,
         ease: 'osmo',
+        onUpdate: () => {
+          const y = gsap.getProperty(outer, 'y') as number
+          document.documentElement.dataset.menuShiftY = String(y)
+          document.documentElement.style.setProperty('--menu-shift', `${y}px`)
+        },
         onComplete: () => {
           // Clear all inline styles
           gsap.set(outer, {clearProps: 'all'})
@@ -129,6 +143,10 @@ export function PageLayout({
             lenis.start()
             lenis.resize()
           }
+          delete document.documentElement.dataset.menuOpen
+          delete document.documentElement.dataset.frozenScroll
+          delete document.documentElement.dataset.menuShiftY
+          document.documentElement.style.removeProperty('--menu-shift')
           isAnimatingRef.current = false
         },
       })
@@ -164,6 +182,7 @@ export function PageLayout({
         >
           <div ref={mainContentInnerRef}>
             <main>{children}</main>
+            <BehindTheScenesSection />
             <SiteFooter />
           </div>
         </div>

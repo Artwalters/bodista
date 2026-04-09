@@ -1,6 +1,9 @@
+import {BracketLines} from './BracketLines'
+
 export function AboutSection() {
   return (
     <section className="about-section">
+      <BracketLines />
       <p
         data-animation="webgl-text"
         data-animation-scrub

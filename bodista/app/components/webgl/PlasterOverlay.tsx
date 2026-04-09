@@ -138,7 +138,15 @@ export function PlasterOverlay({
         if (cancelled) return
         animationId = requestAnimationFrame(render)
 
-        material.uniforms.uOffset.value.set(0, -window.scrollY / TILE_PX)
+        const frozen = document.documentElement.dataset.frozenScroll
+        const scrollY = frozen != null ? parseFloat(frozen) : window.scrollY
+        const menuY = parseFloat(
+          document.documentElement.dataset.menuShiftY || '0',
+        )
+        material.uniforms.uOffset.value.set(
+          0,
+          -(scrollY - menuY) / TILE_PX,
+        )
 
         renderer.render(scene, camera)
       }
@@ -166,6 +174,7 @@ export function PlasterOverlay({
   return (
     <canvas
       ref={canvasRef}
+      className="paper-overlay"
       style={{
         position: 'fixed',
         top: 0,
