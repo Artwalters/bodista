@@ -3,6 +3,7 @@ import type {Route} from './+types/_index';
 import {Suspense} from 'react';
 import {HeroHeader} from '~/components/home/HeroHeader';
 import {AboutSection} from '~/components/home/AboutSection';
+import {RoutineSection} from '~/components/home/RoutineSection';
 import {ProductHighlights} from '~/components/home/ProductHighlights';
 
 export const meta: Route.MetaFunction = () => {
@@ -52,6 +53,7 @@ export default function Homepage() {
           }}
         </Await>
       </Suspense>
+      <RoutineSection />
     </div>
   );
 }
