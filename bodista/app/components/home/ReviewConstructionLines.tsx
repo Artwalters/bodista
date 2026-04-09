@@ -24,7 +24,7 @@ export function ReviewConstructionLines() {
         scrollTrigger: {
           trigger: el,
           start: 'top bottom',
-          end: 'center center',
+          end: 'bottom center',
           scrub: 1,
         },
       })
@@ -56,10 +56,9 @@ export function ReviewConstructionLines() {
   const cy = 250
   const FAR = 2000
 
-  // Both diagonals start at the top so stroke draws downward.
-  const slope = 0.7
-  const d1 = {x1: cx - FAR, y1: cy - FAR * slope, x2: cx + FAR, y2: cy + FAR * slope}
-  const d2 = {x1: cx + FAR, y1: cy - FAR * slope, x2: cx - FAR, y2: cy + FAR * slope}
+  // Diagonals of the column rectangle — they naturally cross at (150, 250) = circle center.
+  const d1 = {x1: 0, y1: 0, x2: 300, y2: 500}
+  const d2 = {x1: 300, y1: 0, x2: 0, y2: 500}
 
   const common = {
     stroke: 'currentColor',

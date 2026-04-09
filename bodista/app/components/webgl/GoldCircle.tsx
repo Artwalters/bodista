@@ -4,9 +4,11 @@ import {useEffect, useRef} from 'react'
 
 interface GoldCircleProps {
   mask?: string
+  text?: string
 }
 
-export function GoldCircle({mask}: GoldCircleProps = {}) {
+export function GoldCircle({mask, text}: GoldCircleProps = {}) {
+  const useMask = Boolean(mask || text)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -49,7 +51,39 @@ export function GoldCircle({mask}: GoldCircleProps = {}) {
       tex.colorSpace = THREE.SRGBColorSpace
 
       let maskTex: THREE.Texture | null = null
-      if (mask) {
+      if (text) {
+        if (document.fonts && 'ready' in document.fonts) {
+          try {
+            await document.fonts.ready
+          } catch {}
+        }
+        if (cancelled) {
+          tex.dispose()
+          return
+        }
+        const SIZE = 1024
+        const c = document.createElement('canvas')
+        c.width = SIZE
+        c.height = SIZE
+        const ctx = c.getContext('2d')!
+        const rootStyle = getComputedStyle(document.documentElement)
+        const fontFamily =
+          rootStyle.getPropertyValue('--font-display').trim() ||
+          getComputedStyle(canvas).fontFamily ||
+          'serif'
+        ctx.fillStyle = '#ffffff'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.font = `900 ${Math.floor(SIZE * 0.82)}px ${fontFamily}`
+        // Arrow glyphs sit visually above the baseline; nudge down for optical centering.
+        ctx.fillText(text, SIZE / 2, SIZE / 2 + SIZE * 0.08)
+        maskTex = new THREE.CanvasTexture(c)
+        maskTex.minFilter = THREE.LinearMipmapLinearFilter
+        maskTex.magFilter = THREE.LinearFilter
+        maskTex.anisotropy = renderer.capabilities.getMaxAnisotropy()
+        maskTex.generateMipmaps = true
+        maskTex.needsUpdate = true
+      } else if (mask) {
         const img = await new Promise<HTMLImageElement>((resolve, reject) => {
           const i = new Image()
           i.crossOrigin = 'anonymous'
@@ -83,7 +117,7 @@ export function GoldCircle({mask}: GoldCircleProps = {}) {
       const material = new THREE.ShaderMaterial({
         transparent: true,
         extensions: {derivatives: true} as any,
-        defines: mask ? {USE_MASK: ''} : {},
+        defines: useMask ? {USE_MASK: ''} : {},
         vertexShader: `
           varying vec2 vUv;
           void main(){
@@ -220,7 +254,7 @@ export function GoldCircle({mask}: GoldCircleProps = {}) {
       if (raf) cancelAnimationFrame(raf)
       if (cleanup) cleanup()
     }
-  }, [mask])
+  }, [mask, text])
 
   return <canvas ref={canvasRef} className="routine-step-canvas" aria-hidden="true" />
 }

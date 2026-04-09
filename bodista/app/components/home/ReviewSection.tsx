@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import {ReviewConstructionLines} from './ReviewConstructionLines'
+import {GoldCircle} from '~/components/webgl/GoldCircle'
 
 interface Review {
   name: string
@@ -29,17 +30,14 @@ const REVIEWS: Review[] = [
 ]
 
 const ArrowLeft = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10 5L3 12L10 19" stroke="currentColor" strokeMiterlimit="10" />
-    <path d="M3 12H22" stroke="currentColor" strokeMiterlimit="10" />
-  </svg>
+  <span className="review-nav-arrow">
+    <GoldCircle text="←" />
+  </span>
 )
-
 const ArrowRight = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M14 5L21 12L14 19" stroke="currentColor" strokeMiterlimit="10" />
-    <path d="M21 12H2" stroke="currentColor" strokeMiterlimit="10" />
-  </svg>
+  <span className="review-nav-arrow">
+    <GoldCircle text="→" />
+  </span>
 )
 
 export function ReviewSection() {
