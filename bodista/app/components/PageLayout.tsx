@@ -163,11 +163,6 @@ export function PageLayout({
         >
           <div ref={mainContentInnerRef}>
             <main>{children}</main>
-            <Footer
-              footer={footer}
-              header={header}
-              publicStoreDomain={publicStoreDomain}
-            />
           </div>
         </div>
       </Aside.Provider>

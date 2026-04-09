@@ -13,50 +13,25 @@ void main() {
 const fragShader = /* glsl */ `
 precision highp float;
 
-uniform sampler2D uDiffuse;
-uniform sampler2D uNormal;
+uniform sampler2D uPlaster;
+uniform sampler2D uRoughness;
 uniform vec2 uTile;
 uniform vec2 uOffset;
-uniform vec2 uLightDir;
-uniform float uLightAltitude;
-uniform float uDepth;
 uniform float uBrightness;
 uniform float uContrast;
-uniform vec2 uMouse;
-uniform float uAspect;
+uniform float uRoughnessMix;
 
 varying vec2 vUv;
 
 void main() {
   vec2 uv = vUv * uTile + uOffset;
 
-  vec3 diffuse = texture2D(uDiffuse, uv).rgb;
+  vec3 plaster = texture2D(uPlaster, uv).rgb;
+  float rough = texture2D(uRoughness, uv).r;
 
-  // Mouse proximity boost (0 far away, 1 at cursor)
-  vec2 d = (vUv - uMouse) * vec2(uAspect, 1.0);
-  float mouseBoost = smoothstep(0.35, 0.0, length(d));
+  // Blend plaster with the roughness pattern for extra grit
+  vec3 color = plaster * mix(1.0, rough + 0.3, uRoughnessMix);
 
-  float depth = uDepth * (1.0 + mouseBoost * 1.8);
-
-  vec3 normal = texture2D(uNormal, uv).rgb * 2.0 - 1.0;
-  normal.xy *= depth;
-  normal = normalize(normal);
-
-  vec3 lightDir = normalize(vec3(uLightDir, uLightAltitude));
-  float NdotL = dot(normal, lightDir);
-
-  // Fiber shading: subtle light/dark based on surface direction
-  float shading = 0.5 + NdotL * 0.5;
-
-  // Specular highlight on paper fibers
-  vec3 viewDir = vec3(0.0, 0.0, 1.0);
-  vec3 halfDir = normalize(lightDir + viewDir);
-  float spec = pow(max(dot(normal, halfDir), 0.0), 24.0) * 0.12;
-
-  float shadingMix = 0.6 + mouseBoost * 0.3;
-  vec3 color = diffuse * mix(1.0, shading, shadingMix) + spec * (1.0 + mouseBoost * 1.5);
-
-  // Brightness and contrast adjust so multiply blend feels balanced
   color = (color - 0.5) * uContrast + 0.5 + uBrightness;
   color = clamp(color, 0.0, 1.0);
 
@@ -64,15 +39,15 @@ void main() {
 }
 `
 
-export interface PaperOverlayProps {
+export interface PlasterOverlayProps {
   blendMode?: 'multiply' | 'screen' | 'overlay' | 'soft-light'
   opacity?: number
 }
 
-export function PaperOverlay({
+export function PlasterOverlay({
   blendMode = 'multiply',
-  opacity = 0.6,
-}: PaperOverlayProps = {}) {
+  opacity = 0.2,
+}: PlasterOverlayProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -105,33 +80,32 @@ export function PaperOverlay({
           loader.load(url, resolve, undefined, reject)
         })
 
-      const base = '/assets/logos/Paper001_1K-JPG/Paper001_1K-JPG'
-      const [diffuse, normal] = await Promise.all([
-        loadTex(`${base}_Color.jpg`),
-        loadTex(`${base}_NormalGL.jpg`),
+      const [plaster, roughness] = await Promise.all([
+        loadTex('/assets/textures/plaster.jpg'),
+        loadTex('/assets/textures/roughness.jpg'),
       ])
       if (cancelled) {
-        diffuse.dispose()
-        normal.dispose()
+        plaster.dispose()
+        roughness.dispose()
         return
       }
 
-      for (const t of [diffuse, normal]) {
+      for (const t of [plaster, roughness]) {
         t.wrapS = THREE.RepeatWrapping
         t.wrapT = THREE.RepeatWrapping
         t.anisotropy = renderer.capabilities.getMaxAnisotropy()
       }
-      diffuse.colorSpace = THREE.SRGBColorSpace
-      normal.colorSpace = THREE.NoColorSpace
+      plaster.colorSpace = THREE.SRGBColorSpace
+      roughness.colorSpace = THREE.NoColorSpace
 
-      const TILE_PX = 340
+      const TILE_PX = 1100
 
       const material = new THREE.ShaderMaterial({
         vertexShader: vertShader,
         fragmentShader: fragShader,
         uniforms: {
-          uDiffuse: {value: diffuse},
-          uNormal: {value: normal},
+          uPlaster: {value: plaster},
+          uRoughness: {value: roughness},
           uTile: {
             value: new THREE.Vector2(
               window.innerWidth / TILE_PX,
@@ -139,13 +113,9 @@ export function PaperOverlay({
             ),
           },
           uOffset: {value: new THREE.Vector2(0, 0)},
-          uLightDir: {value: new THREE.Vector2(-0.4, 0.5)},
-          uLightAltitude: {value: 0.55},
-          uDepth: {value: 1.6},
-          uBrightness: {value: 0.08},
-          uContrast: {value: 1.15},
-          uMouse: {value: new THREE.Vector2(0.5, 0.5)},
-          uAspect: {value: window.innerWidth / window.innerHeight},
+          uBrightness: {value: 0.05},
+          uContrast: {value: 1.1},
+          uRoughnessMix: {value: 0.35},
         },
         depthTest: false,
         depthWrite: false,
@@ -155,26 +125,12 @@ export function PaperOverlay({
       const mesh = new THREE.Mesh(geometry, material)
       scene.add(mesh)
 
-      const mouse = {x: 0, y: 0}
-      const smooth = {x: 0, y: 0}
-      const mouseUv = {x: 0.5, y: 0.5}
-      const smoothUv = {x: 0.5, y: 0.5}
-
-      const onMouseMove = (e: MouseEvent) => {
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1
-        mouse.y = -((e.clientY / window.innerHeight) * 2 - 1)
-        mouseUv.x = e.clientX / window.innerWidth
-        mouseUv.y = 1 - e.clientY / window.innerHeight
-      }
-      window.addEventListener('mousemove', onMouseMove)
-
       const onResize = () => {
         renderer.setSize(window.innerWidth, window.innerHeight, false)
         material.uniforms.uTile.value.set(
           window.innerWidth / TILE_PX,
           window.innerHeight / TILE_PX,
         )
-        material.uniforms.uAspect.value = window.innerWidth / window.innerHeight
       }
       window.addEventListener('resize', onResize)
 
@@ -182,18 +138,6 @@ export function PaperOverlay({
         if (cancelled) return
         animationId = requestAnimationFrame(render)
 
-        smooth.x += (mouse.x - smooth.x) * 0.03
-        smooth.y += (mouse.y - smooth.y) * 0.03
-        smoothUv.x += (mouseUv.x - smoothUv.x) * 0.12
-        smoothUv.y += (mouseUv.y - smoothUv.y) * 0.12
-
-        material.uniforms.uLightDir.value.set(
-          -0.4 + smooth.x * 0.4,
-          0.5 + smooth.y * 0.4,
-        )
-        material.uniforms.uMouse.value.set(smoothUv.x, smoothUv.y)
-
-        // Scroll the texture with the page (negative = content moves up = tex moves up)
         material.uniforms.uOffset.value.set(0, -window.scrollY / TILE_PX)
 
         renderer.render(scene, camera)
@@ -201,12 +145,11 @@ export function PaperOverlay({
       render()
 
       cleanup = () => {
-        window.removeEventListener('mousemove', onMouseMove)
         window.removeEventListener('resize', onResize)
         geometry.dispose()
         material.dispose()
-        diffuse.dispose()
-        normal.dispose()
+        plaster.dispose()
+        roughness.dispose()
         renderer.dispose()
       }
     }

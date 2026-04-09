@@ -1,4 +1,5 @@
 import {Link} from 'react-router'
+import {GoldCircle} from '~/components/webgl/GoldCircle'
 
 const Arrow = () => (
   <svg
@@ -16,7 +17,7 @@ const Arrow = () => (
 
 const StepButton = ({num}: {num: string}) => (
   <button type="button" className="routine-step" aria-label={`Step ${num}`}>
-    <span className="routine-step-placeholder" />
+    <GoldCircle />
     <span className="routine-step-label">{num}</span>
   </button>
 )
