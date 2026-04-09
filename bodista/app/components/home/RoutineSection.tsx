@@ -45,7 +45,14 @@ const RoutineBlock = ({
 }: RoutineBlockProps) => (
   <div className={`routine-block${reverse ? ' routine-block-reverse' : ''}`}>
     <div className="routine-side-col">
-      <span className="routine-image-side-label">{imageSideLabel}</span>
+      <span
+        className="routine-image-side-label"
+        data-animation="webgl-text"
+        data-animation-scrub
+        data-animation-gold
+      >
+        {imageSideLabel}
+      </span>
     </div>
     <div className="routine-copy">
       <h3 className="routine-title">{title}</h3>

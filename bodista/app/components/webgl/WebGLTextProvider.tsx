@@ -13,6 +13,61 @@ void main() {
 }
 `
 
+const goldFragShader = /* glsl */ `
+uniform float uReveal;
+uniform float uOpacity;
+uniform sampler2D uMatcap;
+uniform vec2 uResolution;
+varying vec2 vUv;
+
+float hashG(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+float noiseG(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  float a = hashG(i);
+  float b = hashG(i + vec2(1.0, 0.0));
+  float c = hashG(i + vec2(0.0, 1.0));
+  float d = hashG(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+float fbmG(vec2 p) {
+  float value = 0.0;
+  float amp = 0.6;
+  for (int i = 0; i < 7; i++) {
+    value += amp * noiseG(p);
+    p *= 2.2;
+    amp *= 0.55;
+  }
+  return value;
+}
+
+void main() {
+  float n = fbmG(vUv * 10.0);
+  float expandedReveal = uReveal * 1.6 - 0.3;
+  float mask = smoothstep(expandedReveal - 0.15, expandedReveal + 0.15, n);
+  float alpha = 1.0 - mask;
+  alpha *= uOpacity;
+  if (alpha < 0.01) discard;
+
+  // Sample matcap with an offset that follows the cursor, so reflections shift
+  // with the mouse and the dark corner of the matcap is never revealed.
+  // Sample matcap in screen space so the gold gradient spans the entire text block
+  vec2 muv = gl_FragCoord.xy / uResolution;
+  muv = muv * 0.6 + 0.2;
+  vec3 color = texture2D(uMatcap, muv).rgb;
+  color.b *= 0.78;
+  color.r *= 1.05;
+  color = pow(color, vec3(0.82));
+  color *= 1.25;
+  color = clamp(color, 0.0, 1.0);
+
+  gl_FragColor = vec4(color, alpha);
+}
+`
+
 const textFragShader = /* glsl */ `
 uniform float uReveal;
 uniform float uOpacity;
@@ -63,6 +118,7 @@ interface TextEntry {
   bounds: DOMRect
   y: number
   anchorX: string
+  vertical: boolean
 }
 
 export function WebGLTextProvider() {
@@ -124,6 +180,17 @@ export function WebGLTextProvider() {
       const texts: TextEntry[] = []
       const seen = new WeakSet<HTMLElement>()
 
+      const texLoader = new THREE.TextureLoader()
+      const goldMatcap = await new Promise<any>((resolve, reject) => {
+        texLoader.load('/assets/textures/image.png', resolve, undefined, reject)
+      })
+      if (cancelled) return
+      goldMatcap.colorSpace = THREE.SRGBColorSpace
+      const goldResolution = new THREE.Vector2(
+        screen.width * Math.min(window.devicePixelRatio, 2),
+        screen.height * Math.min(window.devicePixelRatio, 2),
+      )
+
       const addText = (element: HTMLElement) => {
         if (seen.has(element)) return
         seen.add(element)
@@ -133,22 +200,34 @@ export function WebGLTextProvider() {
         const y = bounds.top + lenis.actualScroll
         const fontSizeNum = parseFloat(computed.fontSize)
         const color = new THREE.Color(computed.color)
+        const isGold = element.hasAttribute('data-animation-gold')
 
         const material = new THREE.ShaderMaterial({
           vertexShader: textVertShader,
-          fragmentShader: textFragShader,
+          fragmentShader: isGold ? goldFragShader : textFragShader,
           transparent: true,
-          uniforms: {
-            uReveal: new THREE.Uniform(0),
-            uOpacity: new THREE.Uniform(1),
-            uColor: new THREE.Uniform(color),
-          },
+          uniforms: isGold
+            ? {
+                uReveal: new THREE.Uniform(0),
+                uOpacity: new THREE.Uniform(1),
+                uMatcap: new THREE.Uniform(goldMatcap),
+                uResolution: new THREE.Uniform(goldResolution),
+              }
+            : {
+                uReveal: new THREE.Uniform(0),
+                uOpacity: new THREE.Uniform(1),
+                uColor: new THREE.Uniform(color),
+              },
         })
 
         const isItalic = computed.fontStyle === 'italic'
+        const writingMode = computed.writingMode
+        const vertical =
+          writingMode === 'vertical-rl' || writingMode === 'vertical-lr'
         const textAlign = computed.textAlign
-        const anchorX =
-          textAlign === 'center'
+        const anchorX = vertical
+          ? '0%'
+          : textAlign === 'center'
             ? '50%'
             : textAlign === 'right' || textAlign === 'end'
               ? '100%'
@@ -160,7 +239,7 @@ export function WebGLTextProvider() {
         mesh.anchorY = '50%'
         mesh.material = material
         mesh.fontSize = fontSizeNum
-        mesh.textAlign = computed.textAlign
+        mesh.textAlign = vertical ? 'center' : computed.textAlign
 
         const ls = parseFloat(computed.letterSpacing)
         mesh.letterSpacing = isNaN(ls) ? 0 : ls / fontSizeNum
@@ -168,21 +247,28 @@ export function WebGLTextProvider() {
         const lh = parseFloat(computed.lineHeight)
         mesh.lineHeight = isNaN(lh) ? 1.2 : lh / fontSizeNum
 
-        mesh.maxWidth = bounds.width
+        // For vertical writing, the text is rotated 90° — use height as the flow width
+        mesh.maxWidth = vertical ? bounds.height : bounds.width
         mesh.whiteSpace = computed.whiteSpace
+
+        if (vertical) {
+          // writing-mode: vertical-rl rotates text 90° clockwise
+          mesh.rotation.z = -Math.PI / 2
+        }
 
         scene.add(mesh)
         const originalColor = element.style.color
         element.style.color = 'transparent'
         restoreElements.push({el: element, val: originalColor})
 
-        const entry: TextEntry & {anchorX: string} = {
+        const entry: TextEntry = {
           mesh,
           element,
           material,
           bounds,
           y,
           anchorX,
+          vertical,
         }
         texts.push(entry)
 
@@ -197,8 +283,8 @@ export function WebGLTextProvider() {
             },
             scrollTrigger: {
               trigger: element,
-              start: 'top bottom',
-              end: 'bottom 50%',
+              start: 'top 120%',
+              end: 'bottom 70%',
               scrub: true,
             },
           })
@@ -235,18 +321,26 @@ export function WebGLTextProvider() {
       const update = () => {
         if (needsRender) {
           texts.forEach((t) => {
-            const offsetX =
-              t.anchorX === '50%'
-                ? t.bounds.width / 2
-                : t.anchorX === '100%'
-                  ? t.bounds.width
-                  : 0
-            t.mesh.position.x = t.bounds.left - screen.width / 2 + offsetX
-            t.mesh.position.y =
-              -t.y +
-              lenis.animatedScroll +
-              screen.height / 2 -
-              t.bounds.height / 2
+            if (t.vertical) {
+              // Pivot at top-centre of the box; text flows downward after rotation
+              t.mesh.position.x =
+                t.bounds.left - screen.width / 2 + t.bounds.width / 2
+              t.mesh.position.y =
+                -t.y + lenis.animatedScroll + screen.height / 2
+            } else {
+              const offsetX =
+                t.anchorX === '50%'
+                  ? t.bounds.width / 2
+                  : t.anchorX === '100%'
+                    ? t.bounds.width
+                    : 0
+              t.mesh.position.x = t.bounds.left - screen.width / 2 + offsetX
+              t.mesh.position.y =
+                -t.y +
+                lenis.animatedScroll +
+                screen.height / 2 -
+                t.bounds.height / 2
+            }
           })
           renderer.render(scene, camera)
           needsRender = false
@@ -259,7 +353,9 @@ export function WebGLTextProvider() {
         screen.width = window.innerWidth
         screen.height = window.innerHeight
         renderer.setSize(screen.width, screen.height)
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        const pr = Math.min(window.devicePixelRatio, 2)
+        renderer.setPixelRatio(pr)
+        goldResolution.set(screen.width * pr, screen.height * pr)
         camera.fov = 2 * Math.atan(screen.height / 2 / DIST) * (180 / Math.PI)
         camera.aspect = screen.width / screen.height
         camera.updateProjectionMatrix()
@@ -274,7 +370,7 @@ export function WebGLTextProvider() {
           t.mesh.letterSpacing = isNaN(ls) ? 0 : ls / fs
           const lh = parseFloat(computed.lineHeight)
           t.mesh.lineHeight = isNaN(lh) ? 1.2 : lh / fs
-          t.mesh.maxWidth = t.bounds.width
+          t.mesh.maxWidth = t.vertical ? t.bounds.height : t.bounds.width
         })
 
         needsRender = true
