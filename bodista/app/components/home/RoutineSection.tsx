@@ -48,7 +48,6 @@ const RoutineBlock = ({
     </div>
     <div className="routine-copy">
       <h3 className="routine-title">{title}</h3>
-      <p className="routine-subtitle">{subtitle}</p>
       <p className="routine-body">{body}</p>
       <div className="routine-steps">
         <StepButton num="I" />
