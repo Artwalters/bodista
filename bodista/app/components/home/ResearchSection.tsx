@@ -64,9 +64,19 @@ export function ResearchSection() {
       </ol>
 
       <div className="research-body">
-        {tab.body.split('\n\n').map((para, idx) => (
-          <p key={idx}>{para}</p>
-        ))}
+        <div className="research-body-stack">
+          {TABS.map((t, i) => (
+            <div
+              key={t.key}
+              className={`research-body-pane${i === active ? ' is-active' : ''}`}
+              aria-hidden={i !== active}
+            >
+              {t.body.split('\n\n').map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))}
+            </div>
+          ))}
+        </div>
 
         <div className="routine-links">
           <hr />

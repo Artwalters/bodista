@@ -6,6 +6,7 @@ import {AboutSection} from '~/components/home/AboutSection';
 import {RoutineSection} from '~/components/home/RoutineSection';
 import {ReviewSection} from '~/components/home/ReviewSection';
 import {ResearchSection} from '~/components/home/ResearchSection';
+import {LibrarySection} from '~/components/home/LibrarySection';
 import {ProductHighlights} from '~/components/home/ProductHighlights';
 
 export const meta: Route.MetaFunction = () => {
@@ -58,6 +59,7 @@ export default function Homepage() {
       <RoutineSection />
       <ReviewSection />
       <ResearchSection />
+      <LibrarySection />
     </div>
   );
 }

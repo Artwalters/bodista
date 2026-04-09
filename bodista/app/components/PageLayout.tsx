@@ -19,6 +19,7 @@ import {Footer} from '~/components/Footer'
 import {Header, HeaderMenu} from '~/components/Header'
 import {CartMain} from '~/components/CartMain'
 import {MenuPanel} from '~/components/MenuPanel'
+import {SiteFooter} from '~/components/SiteFooter'
 import {getLenisInstance} from '~/lib/lenis'
 import {
   SEARCH_ENDPOINT,
@@ -163,6 +164,7 @@ export function PageLayout({
         >
           <div ref={mainContentInnerRef}>
             <main>{children}</main>
+            <SiteFooter />
           </div>
         </div>
       </Aside.Provider>

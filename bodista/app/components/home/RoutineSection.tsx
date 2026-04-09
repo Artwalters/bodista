@@ -93,7 +93,7 @@ export function RoutineSection() {
   return (
     <section className="routine-section">
       <RoutineBlock
-        title="face routine"
+        title="Face routine"
         subtitle="Nourish with ritual"
         body="Warm a few drops between your palms and press into the skin. Breathe in the aromatic botanicals. The ritual is as much about scent as skin."
         image="/images/face-mist-sunlight.webp"
@@ -103,7 +103,7 @@ export function RoutineSection() {
       />
 
       <RoutineBlock
-        title="body routine"
+        title="Body routine"
         subtitle="Cleanse with intention"
         body="Begin with a gentle botanical cleanser to remove the day. Pat your skin damp, not dry. Moisture is the bridge between cleanser and oil."
         image="/images/body-oil-dramatic.webp"
